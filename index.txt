@@ -1,0 +1,2434 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2d4a85">
+<title>ระบบธุรการ สกร.อำเภอฝาง</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p:#3d5a99;--pk:#2c4278;--pl:#e8edf7;
+  --acc:#ee6c4d;--ok:#2d9c6f;--err:#c0392b;--warn:#e67e22;
+  --g50:#f8f9fb;--g100:#f0f2f5;--g200:#e2e6ea;--g400:#9ba8b7;--g600:#5a6474;--g800:#2d3340;
+  --r:12px;--rl:20px;--rs:6px;
+  --sh:0 4px 16px rgba(0,0,0,.10);--shl:0 12px 40px rgba(0,0,0,.15);
+  --tr:.2s ease;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:15px}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:linear-gradient(135deg,#1a2a4a,#3d5a99 60%,#5e8ab4);min-height:100vh;color:var(--g800)}
+ 
+/* ── Shell ── */
+#app-shell{display:none;min-height:100vh;flex-direction:column}
+ 
+/* ── Header ── */
+.app-header{background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.12);padding:0 28px;display:flex;align-items:center;gap:16px;height:64px;position:sticky;top:0;z-index:100}
+.hlogo{width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);padding:3px}
+.hlogo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.25))}
+.htitle{color:#fff;flex:1}
+.htitle h1{font-size:1.1rem;font-weight:700}
+.htitle p{font-size:.8rem;opacity:.75;margin-top:1px}
+.year-badge{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:6px 14px;color:#fff;font-size:.88rem}
+.year-badge span{font-weight:700;font-size:1rem}
+.btn-ych{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:50px;padding:5px 14px;font-size:.82rem;cursor:pointer;transition:var(--tr);font-family:inherit}
+.btn-ych:hover{background:rgba(255,255,255,.3)}
+.btn-logout{background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);padding:6px 16px;border-radius:50px;cursor:pointer;font-size:.85rem;transition:var(--tr);font-family:inherit}
+.btn-logout:hover{background:rgba(220,50,50,.35);border-color:transparent;color:#fff}
+ 
+/* ── Main ── */
+.app-main{flex:1;padding:28px;max-width:1500px;width:100%;margin:0 auto}
+ 
+/* ── Stats ── */
+.stats-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.stat-card{background:#fff;border-radius:var(--r);padding:14px 22px;flex:1;min-width:150px;box-shadow:0 1px 3px rgba(0,0,0,.08);border:1px solid var(--g100);display:flex;align-items:center;gap:14px}
+.stat-icon{font-size:1.8rem}
+.stat-label{font-size:.78rem;color:var(--g400);text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font-size:1.6rem;font-weight:700;color:var(--p);line-height:1;margin-top:2px}
+ 
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:240px;position:relative}
+.search-wrap input{width:100%;padding:10px 42px 10px 16px;border:1.5px solid var(--g200);border-radius:50px;font-size:.93rem;background:#fff;font-family:inherit;transition:var(--tr)}
+.search-wrap input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+.search-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--g400);pointer-events:none}
+ 
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border:none;border-radius:50px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit;transition:var(--tr);white-space:nowrap}
+.btn-p{background:var(--p);color:#fff;box-shadow:0 3px 10px rgba(61,90,153,.35)}
+.btn-p:hover{background:var(--pk);transform:translateY(-1px)}
+.btn-p:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-sec{background:#fff;color:var(--g600);border:1.5px solid var(--g200)}
+.btn-sec:hover{background:var(--g50);border-color:var(--g400)}
+.btn-sm{padding:6px 14px;font-size:.82rem}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-ok:hover{filter:brightness(1.1)}
+.btn-err{background:var(--err);color:#fff}
+.btn-err:hover{filter:brightness(1.1)}
+.btn-warn{background:var(--warn);color:#fff}
+.btn-warn:hover{filter:brightness(1.1)}
+ 
+/* ── Table ── */
+.table-card{background:#fff;border-radius:var(--rl);box-shadow:var(--sh);overflow:hidden;border:1px solid var(--g100)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--p)}
+th{padding:14px 16px;text-align:left;font-size:.83rem;font-weight:600;color:#fff;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--g100);transition:background var(--tr)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--pl)}
+td{padding:12px 16px;font-size:.9rem;color:var(--g800);vertical-align:middle}
+.num-col{font-weight:600;color:var(--p);font-size:.88rem}
+.empty-row td{text-align:center;padding:60px;color:var(--g400);font-size:1rem}
+.empty-icon{font-size:3rem;display:block;margin-bottom:12px}
+.badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:.75rem;font-weight:600}
+.badge-blue{background:#dbe8f8;color:#2a5298}
+ 
+/* File chips */
+.file-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;background:#eaf0fb;color:var(--p);border:1px solid #b8cbe8;border-radius:50px;font-size:.78rem;font-weight:500;cursor:pointer;transition:var(--tr);white-space:nowrap}
+.chip:hover{background:var(--p);color:#fff;border-color:var(--p)}
+ 
+/* ── Login ── */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:5000;background:linear-gradient(135deg,#1a2a4a,#3d5a99 60%,#5e8ab4)}
+.login-card{background:#fff;border-radius:var(--rl);padding:44px 40px;width:100%;max-width:400px;box-shadow:var(--shl);text-align:center}
+.login-logo{width:110px;height:110px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;filter:drop-shadow(0 6px 18px rgba(61,90,153,.35))}
+.login-logo img{width:100%;height:100%;object-fit:contain}
+.login-card h2{font-size:1.3rem;color:var(--p);font-weight:700}
+.login-card p{color:var(--g400);font-size:.9rem;margin-top:4px;margin-bottom:28px}
+.inp-grp{position:relative;margin-bottom:14px}
+.inp-grp input{width:100%;padding:13px 16px 13px 42px;border:1.5px solid var(--g200);border-radius:var(--r);font-size:1rem;font-family:inherit;transition:var(--tr)}
+.inp-grp input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+.inp-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--g400)}
+.login-err{background:#fdecea;color:var(--err);border-radius:var(--rs);padding:9px 14px;font-size:.88rem;margin-bottom:14px;display:none}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,var(--p),#5e8ab4);color:#fff;border:none;border-radius:var(--r);font-size:1.05rem;font-weight:700;cursor:pointer;font-family:inherit;transition:var(--tr);box-shadow:0 4px 14px rgba(61,90,153,.4)}
+.btn-login:hover{filter:brightness(1.08);transform:translateY(-1px)}
+ 
+/* ── Overlays / Modals ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px}
+.overlay.active{display:flex}
+.modal-box{background:#fff;border-radius:var(--rl);width:100%;max-width:620px;box-shadow:var(--shl);animation:slideUp .25s ease;max-height:90vh;display:flex;flex-direction:column}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.modal-head{padding:22px 28px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:12px}
+.modal-head h3{font-size:1.1rem;font-weight:700;color:var(--p);flex:1}
+.modal-close{width:32px;height:32px;background:var(--g100);border:none;border-radius:50%;font-size:1.2rem;cursor:pointer;color:var(--g600);display:flex;align-items:center;justify-content:center;transition:var(--tr)}
+.modal-close:hover{background:var(--g200)}
+.modal-body{padding:24px 28px;overflow-y:auto;flex:1}
+.modal-foot{padding:18px 28px;border-top:1px solid var(--g100);display:flex;justify-content:flex-end;gap:10px}
+ 
+/* Form */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fgrid .full{grid-column:1/-1}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:.88rem;font-weight:600;color:var(--g600)}
+.fg label .req{color:var(--acc);margin-left:2px}
+.fg input,.fg textarea,.fg select{padding:10px 13px;border:1.5px solid var(--g200);border-radius:var(--rs);font-size:.93rem;font-family:inherit;transition:var(--tr);background:#fff}
+.fg input:focus,.fg textarea:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+.fg input[readonly]{background:var(--g50);color:var(--g400);cursor:not-allowed}
+.fg input.bad,.fg textarea.bad{border-color:var(--err)}
+.fg textarea{resize:vertical;min-height:72px}
+ 
+/* Upload */
+.upload-zone{border:2px dashed var(--g200);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:var(--tr);background:var(--g50)}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--p);background:var(--pl)}
+.upload-zone p{color:var(--g400);font-size:.9rem;margin-top:6px}
+.file-list-ui{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.file-row{display:flex;align-items:center;gap:10px;background:var(--g50);border:1px solid var(--g100);border-radius:var(--rs);padding:8px 12px}
+.file-row-name{flex:1;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-row-status{font-size:.78rem;color:var(--g400);white-space:nowrap}
+.file-row-del{background:none;border:none;color:var(--g400);cursor:pointer;font-size:1rem;transition:var(--tr);padding:2px 6px;border-radius:4px}
+.file-row-del:hover{color:var(--err);background:#fdecea}
+ 
+.subj-add-row{display:flex;gap:8px;margin-bottom:8px}
+.subj-add-row input{flex:1;padding:10px 14px;border:1.5px solid var(--g200);border-radius:var(--rs);font-size:.9rem;font-family:inherit;transition:var(--tr)}
+.subj-add-row input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+.subj-add-row input.bad{border-color:var(--err)}
+.subj-list-ui{display:flex;flex-direction:column;gap:7px}
+.subj-list-ui .file-row-name{white-space:normal}
+.subj-empty-hint{font-size:.8rem;color:var(--g400);padding:2px 2px 0}
+.subj-edit-inp{flex:1;padding:6px 10px;border:1.5px solid var(--p);border-radius:var(--rs);font-size:.88rem;font-family:inherit}
+.subj-edit-inp:focus{outline:none;box-shadow:0 0 0 3px var(--pl)}
+.subj-edit-inp.bad{border-color:var(--err)}
+.subj-editing{background:var(--pl);border-color:var(--p)}
+.subj-ok{color:var(--ok)}
+.subj-ok:hover{color:var(--ok);background:#e6f6ee}
+.subj-ul{margin:0;padding-left:18px}
+.subj-ul li{margin-bottom:3px;line-height:1.4}
+.subj-ul li:last-child{margin-bottom:0}
+ 
+.filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:-4px 0 14px}
+.filter-bar input{width:230px;max-width:100%;padding:9px 12px;border:1.5px solid var(--g200);border-radius:var(--rs);font-size:.88rem;font-family:inherit;background:#fff;transition:var(--tr)}
+.filter-bar input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+.pf-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.78rem;color:var(--g600);margin-top:6px}
+.pf-chips:empty{display:none}
+.pf-chip{border:1px solid #c7d6ef;background:#fff;color:var(--p);border-radius:99px;padding:3px 11px;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:600}
+.pf-chip:hover{background:var(--p);color:#fff;border-color:var(--p)}
+.ocr-box{padding:12px 14px!important;margin-bottom:14px!important;border-style:solid!important}
+.ag-suggest{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem;color:#b26a00;margin-top:6px}
+.ag-suggest:empty{display:none}
+.ag-chip{border:1px solid var(--p);background:#fff;color:var(--p);border-radius:99px;padding:3px 10px;cursor:pointer;font-family:inherit;font-size:.8rem}
+.ag-chip:hover{background:var(--pl)}
+.mg-target{padding:12px 28px;border-top:1px solid var(--g100);background:var(--g50,#f8f9fc)}
+.mg-trow{display:flex;align-items:center;gap:10px}
+.mg-trow label{font-weight:700;font-size:.85rem;white-space:nowrap}
+.mg-ghead{display:flex;align-items:center;gap:10px;font-size:.78rem;color:#b26a00;margin:12px 0 4px;font-weight:700}
+.mg-ghead a{color:var(--p);cursor:pointer;text-decoration:underline;font-weight:400}
+.mg-row{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border:1px solid var(--g200);border-radius:var(--rs);margin-bottom:5px;cursor:pointer;font-size:.88rem}
+.mg-row:hover{background:var(--pl)}
+.mg-row.sel{background:var(--pl);border-color:var(--p)}
+.mg-row.grp{border-left:4px solid #f0a020}
+.mg-row .cnt{color:var(--g400);font-size:.8rem;white-space:nowrap;margin-left:auto}
+.item-card{border:1.5px solid var(--p);background:#fafcff;border-radius:var(--rs);padding:12px 14px;margin-bottom:12px}
+.item-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:.9rem}
+.mg-group{border:1.5px solid var(--g200);border-radius:var(--rs);padding:12px 14px;margin-bottom:12px}
+.mg-skip{display:block;font-size:.8rem;color:var(--g400);margin-bottom:6px;cursor:pointer}
+.mg-opt{display:flex;gap:8px;align-items:flex-start;padding:4px 0;cursor:pointer;font-size:.9rem}
+.mg-opt .cnt{color:var(--g400);font-size:.8rem;white-space:nowrap}
+.mg-custom{width:100%;margin-top:8px;padding:8px 12px;border:1.5px solid var(--g200);border-radius:var(--rs);font-family:inherit;font-size:.88rem}
+.flt-count{font-size:.82rem;color:var(--g400)}
+ 
+.ocr-box{border:2px dashed var(--p);background:var(--pl);border-radius:var(--rs);padding:14px 16px;margin-bottom:16px}
+.ocr-head{font-weight:700;font-size:.95rem}
+.ocr-free{display:inline-block;background:var(--ok);color:#fff;font-size:.7rem;padding:1px 8px;border-radius:99px;margin-left:6px;vertical-align:middle}
+.ocr-sub{font-size:.8rem;color:var(--g400);margin:4px 0 10px}
+.ocr-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#ocr-status{font-size:.85rem}
+#ocr-raw-wrap{margin-top:10px;font-size:.8rem}
+#ocr-raw{white-space:pre-wrap;max-height:180px;overflow:auto;background:#fff;border:1px solid var(--g200);border-radius:6px;padding:8px;margin:6px 0 0;font-family:inherit}
+.ocr-filled{background:#fffbe6!important;border-color:#f0c040!important}
+.ocr-warn{display:none;margin-top:10px;padding:10px 12px;border-radius:var(--rs);background:#fff3e6;border:1.5px solid #e67e22;color:#a34a00;font-size:.88rem;font-weight:700}
+.ocr-hint{font-size:.8rem;font-weight:700;color:#c0561a;margin-top:5px}
+.ocr-uncertain{background:#ffeedd!important;border-color:#e67e22!important}
+#ocr-prev img{max-width:100%;border:1px solid var(--g200);border-radius:6px;margin-top:6px}
+ 
+#print-root{display:none}
+.rpt{font-family:'Sarabun',sans-serif;color:#000}
+.rpt h2{margin:0;text-align:center;font-size:18px}
+.rpt .rpt-sub{text-align:center;font-size:13px;margin:4px 0 10px}
+.rpt table{width:100%;border-collapse:collapse;font-size:12px}
+.rpt th,.rpt td{border:1px solid #444;padding:5px 7px;vertical-align:top;text-align:left}
+.rpt th{background:#e8edf7;text-align:center}
+.rpt thead{display:table-header-group}
+.rpt tr{page-break-inside:avoid}
+.rpt .rpt-foot{margin-top:8px;font-size:11px;text-align:right}
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  html,body{background:#fff!important}
+  body.printing > *{display:none!important}
+  body.printing > #print-root{display:block!important}
+}
+ 
+ 
+/* Progress overlay for uploads */
+.upload-progress{display:none;background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:10px 13px;margin-top:8px;font-size:.85rem;color:var(--g600)}
+.prog-bar-wrap{height:6px;background:var(--g200);border-radius:99px;overflow:hidden;margin-top:6px}
+.prog-bar{height:100%;background:var(--p);border-radius:99px;transition:width .3s ease;width:0}
+ 
+/* Year cards */
+.year-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.year-card{padding:14px;border:2px solid var(--g200);border-radius:var(--r);text-align:center;cursor:pointer;font-size:1rem;font-weight:600;color:var(--g600);transition:var(--tr);background:#fff;font-family:inherit}
+.year-card:hover{border-color:var(--p);color:var(--p);background:var(--pl)}
+.year-card.active{background:var(--p);color:#fff;border-color:var(--p)}
+.add-year-row{display:flex;gap:10px;align-items:center;padding-top:16px;border-top:1px solid var(--g100);margin-top:4px}
+.add-year-row input{flex:1;padding:10px 13px;border:1.5px solid var(--g200);border-radius:var(--rs);font-size:.93rem;font-family:inherit}
+.add-year-row input:focus{outline:none;border-color:var(--p)}
+ 
+/* Preview */
+#preview-overlay .modal-box{max-width:920px;height:92vh}
+.preview-frame{width:100%;height:100%;border:none}
+ 
+/* Delete Confirm */
+#del-overlay .modal-box{max-width:400px}
+.del-icon-wrap{width:72px;height:72px;background:#fdecea;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 18px}
+.del-title{font-size:1.2rem;font-weight:700;color:var(--g800);text-align:center;margin-bottom:8px}
+.del-sub{font-size:.92rem;color:var(--g400);text-align:center;line-height:1.6}
+.del-divider{height:1px;background:var(--g100);margin:20px 0}
+.del-actions{display:flex;gap:10px}
+.del-actions button{flex:1;padding:12px;border:none;border-radius:var(--r);font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit;transition:var(--tr)}
+.del-cancel{background:var(--g100);color:var(--g600)}
+.del-cancel:hover{background:var(--g200)}
+.del-confirm{background:var(--err);color:#fff;box-shadow:0 4px 12px rgba(192,57,43,.35)}
+.del-confirm:hover{filter:brightness(1.1);box-shadow:0 6px 18px rgba(192,57,43,.45)}
+.del-confirm:active{transform:scale(.97)}
+ 
+/* Loader */
+#loader{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);backdrop-filter:blur(3px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+#loader.on{display:flex}
+.spinner{width:44px;height:44px;border:4px solid var(--g100);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite}
+.loader-msg{font-size:.9rem;color:var(--g600);font-weight:500}
+@keyframes spin{to{transform:rotate(360deg)}}
+ 
+/* Toast */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px}
+.toast{display:flex;align-items:center;gap:12px;background:var(--g800);color:#fff;padding:14px 18px;border-radius:var(--r);box-shadow:var(--shl);min-width:260px;animation:toastIn .3s ease;font-size:.9rem}
+.toast.ok{background:var(--ok)}
+.toast.err{background:var(--err)}
+.toast.warn{background:var(--warn)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+ 
+ 
+/* ═════════ UI v2 ═════════ */
+body{background:radial-gradient(900px 500px at 8% -8%,rgba(120,150,215,.45),transparent 60%),radial-gradient(700px 500px at 100% 0,rgba(94,138,180,.35),transparent 60%),linear-gradient(135deg,#16233f,#2d4a85 55%,#4a76a8);background-attachment:fixed}
+.app-header{background:rgba(14,26,52,.55);border-bottom:1px solid rgba(255,255,255,.1);box-shadow:0 4px 20px rgba(0,0,0,.18)}
+.htitle h1{letter-spacing:.2px}
+.app-main{padding:24px 28px 40px}
+ 
+/* Stats */
+.stat-card{border:none;border-radius:16px;padding:16px 20px;box-shadow:0 6px 20px rgba(10,20,50,.16);transition:transform .2s ease,box-shadow .2s ease}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(10,20,50,.22)}
+.stat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.45rem;flex-shrink:0}
+.ic-blue{background:linear-gradient(135deg,#e3ebfa,#cfdcf5)}
+.ic-green{background:linear-gradient(135deg,#dff5ea,#c4ebd8)}
+.ic-orange{background:linear-gradient(135deg,#fff0dc,#fde0b8)}
+.stat-label{text-transform:none;letter-spacing:0;font-size:.82rem;color:var(--g600)}
+.stat-value{font-size:1.75rem;letter-spacing:-.5px}
+ 
+/* Controls */
+.control-card{background:rgba(255,255,255,.97);border-radius:18px;padding:16px 18px;box-shadow:0 8px 26px rgba(10,20,50,.18);margin-bottom:18px}
+.control-card .toolbar{margin-bottom:0}
+.control-card .filter-bar{margin:14px 0 0;padding-top:14px;border-top:1px dashed var(--g200)}
+.search-wrap input{background:var(--g50);border:1.5px solid var(--g200);padding:11px 44px 11px 18px}
+.search-wrap input:focus{background:#fff}
+.filter-bar input{background:var(--g50);border:1.5px solid var(--g200);border-radius:50px;padding:8px 16px}
+.filter-bar input:focus{background:#fff}
+.btn{box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.btn-sec{border-color:var(--g200)}
+.flt-count{background:var(--g100);border-radius:50px;padding:3px 12px;font-weight:600;color:var(--g600)}
+ 
+/* Table */
+.table-card{border:none;border-radius:18px;box-shadow:0 10px 32px rgba(10,20,50,.22)}
+.table-scroll{max-height:72vh;overflow:auto}
+.table-scroll::-webkit-scrollbar{height:10px;width:10px}
+.table-scroll::-webkit-scrollbar-thumb{background:#c5cfe3;border-radius:99px;border:2px solid #fff}
+.table-scroll::-webkit-scrollbar-track{background:transparent}
+table{border-collapse:separate;border-spacing:0;table-layout:fixed;min-width:1180px}
+thead tr{background:none}
+thead th{position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#4a69a6,#3d5a99);padding:14px 12px;font-size:.82rem;font-weight:600;letter-spacing:.2px;box-shadow:inset 0 -1px 0 rgba(0,0,0,.12)}
+.th-c{text-align:center}
+tbody tr{border-bottom:none}
+tbody tr:hover{background:transparent}
+tbody td{padding:13px 12px;overflow-wrap:anywhere;border-bottom:1px solid #edf0f5;background:#fff;transition:background .15s ease}
+tbody tr.hov td{background:#eef3fc}
+tbody tr.g-multi td{background:#f7f9fe}
+tbody tr.g-multi.hov td{background:#e9f0fc}
+tbody tr.g-multi td.num-col{box-shadow:inset 4px 0 0 var(--p)}
+tbody tr.g-multi:not(.g-last) td.it{border-bottom:1px dashed #cdd7ea}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.g-last td{border-bottom:1px solid #e3e8f2}
+tbody tr:last-child.g-last td{border-bottom:none}
+.num-col{white-space:nowrap;overflow-wrap:normal}
+.badge-blue{background:linear-gradient(135deg,#e3ebfa,#d2e0f7);color:#2a4f96;font-weight:700;padding:4px 12px;letter-spacing:.2px}
+.tag-n{display:block;width:max-content;margin-top:6px;font-size:.7rem;font-weight:600;color:#9a6a00;background:#fff3d6;border:1px solid #f1dba0;border-radius:99px;padding:1px 9px}
+.doc-no{font-weight:600;color:#26324d;line-height:1.4}
+.doc-idx{display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--p);color:#fff;font-size:.68rem;font-weight:700;align-items:center;justify-content:center;margin-right:7px;vertical-align:1px}
+.dt{white-space:nowrap;color:var(--g600);font-variant-numeric:tabular-nums}
+.ag{color:var(--g600);font-size:.86rem;line-height:1.4}
+.subj{line-height:1.5;color:var(--g800)}
+.note{font-size:.84rem;color:var(--g600);line-height:1.4}
+.dash{color:#c5ccd6}
+.chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;background:#fff;border:1px solid #c7d6ef;color:var(--p);padding:4px 11px;box-shadow:0 1px 2px rgba(61,90,153,.08)}
+.chip:hover{background:var(--p);color:#fff;border-color:var(--p)}
+.row-act{display:flex;gap:6px;justify-content:center}
+tbody td:last-child .row-act{min-width:0}
+.icon-btn{width:32px;height:32px;flex-shrink:0;border-radius:10px;border:none;cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;transition:transform .15s ease,background .15s ease,box-shadow .15s ease}
+.icon-btn:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.icon-btn.edit{background:#fff1de}
+.icon-btn.edit:hover{background:#ffe0b5}
+.icon-btn.del{background:#fdeceb}
+.icon-btn.del:hover{background:#f9cdc8}
+.empty-row td{background:#fff!important;padding:70px 20px}
+ 
+/* Modal */
+#form-overlay .modal-box{max-width:760px}
+.modal-head{background:linear-gradient(180deg,#f6f8fd,#fff);border-radius:20px 20px 0 0}
+.modal-foot{background:#fafbfd;border-radius:0 0 20px 20px}
+.item-card{border:1px solid #cfdaf0;border-left:4px solid var(--p);background:#fbfcff;border-radius:12px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(61,90,153,.07)}
+.item-head{padding-bottom:10px;border-bottom:1px dashed #d8e0f0}
+.ocr-box{border:1.5px dashed #7f9bd1;background:linear-gradient(180deg,#f4f7fd,#eaf0fb);border-radius:14px}
+.fg input,.fg textarea,.fg select{border-radius:10px}
+.upload-zone{border-radius:14px}
+ 
+@media(max-width:600px){
+  .app-header{gap:8px;padding:0 10px}
+  .hlogo{width:36px;height:36px}
+  .htitle{min-width:0}
+  .htitle h1{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .year-badge{padding:4px 10px;gap:6px;font-size:.76rem;white-space:nowrap}
+  .year-badge span{font-size:.9rem}
+  .btn-ych{padding:4px 9px;font-size:.74rem;white-space:nowrap}
+  .btn-logout{padding:5px 10px;font-size:.74rem;white-space:nowrap}
+  .stats-bar{gap:8px}
+  .stat-card{min-width:0;padding:10px;gap:8px;flex-direction:column;align-items:flex-start}
+  .stat-icon{width:34px;height:34px;font-size:1.1rem;border-radius:10px}
+  .stat-label{font-size:.74rem}
+  .stat-value{font-size:1.35rem}
+}
+@media(max-width:900px){
+  .stat-card{min-width:120px;padding:12px 14px}
+  .control-card{padding:12px}
+  .table-scroll{max-height:none}
+  thead th{position:static}
+}
+ 
+@media(max-width:768px){
+  .app-main{padding:16px}
+  .app-header{padding:0 16px}
+  .htitle p{display:none}
+  .fgrid{grid-template-columns:1fr}
+}
+
+/* ═════════ กล้องสด ═════════ */
+.cam-wrap{position:relative;width:100%;height:100vh;height:100dvh;background:#000;display:flex;align-items:center;justify-content:center}
+.cam-wrap video{width:100%;height:100%;object-fit:contain;background:#000}
+.cam-hint{position:absolute;top:calc(14px + env(safe-area-inset-top));left:12px;right:12px;text-align:center;color:#fff;font-size:.9rem;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.cam-bar{position:absolute;left:0;right:0;bottom:0;padding:18px 16px calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;background:linear-gradient(0deg,rgba(0,0,0,.65),transparent)}
+.cam-side{min-width:104px;padding:12px 10px;border:none;border-radius:50px;background:rgba(255,255,255,.2);color:#fff;font:600 .9rem 'Sarabun',sans-serif;cursor:pointer}
+.cam-shutter{width:72px;height:72px;border-radius:50%;border:5px solid #fff;background:#ee6c4d;cursor:pointer;box-shadow:0 0 0 3px rgba(0,0,0,.35)}
+.cam-shutter:active{transform:scale(.92)}
+
+/* ═════════ MOBILE v3: ถ่ายรูป / พูด / การ์ดรายการ ═════════ */
+.m-list{display:none}
+.fab{display:none}
+.btn-cam{background:linear-gradient(135deg,#ee6c4d,#e0553a);color:#fff;box-shadow:0 3px 10px rgba(238,108,77,.4)}
+.btn-cam:hover{filter:brightness(1.08)}
+.btn-cam:disabled{opacity:.6;cursor:not-allowed}
+.mic-btn{width:30px;height:30px;padding:0;margin-left:8px;border-radius:50%;border:1.5px solid var(--g200);background:#fff;cursor:pointer;font-size:.95rem;line-height:1;vertical-align:middle;display:inline-flex;align-items:center;justify-content:center;transition:var(--tr);font-family:inherit}
+.mic-btn:hover{border-color:var(--p);background:var(--pl)}
+.mic-btn.rec{background:var(--err);border-color:var(--err);color:#fff;animation:micPulse 1s ease-in-out infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.5)}50%{box-shadow:0 0 0 7px rgba(192,57,43,0)}}
+.mic-btn.nosupport{display:none}
+.search-wrap input{padding-right:84px}
+.search-wrap .mic-btn{position:absolute;right:40px;top:50%;transform:translateY(-50%);margin:0}
+.mic-live{display:none;font-size:.8rem;color:var(--err);font-weight:700;margin-top:2px}
+.mic-live.on{display:block}
+.m-card{background:#fff;border-radius:16px;box-shadow:0 6px 20px rgba(10,20,50,.18);overflow:hidden}
+.m-top{display:flex;align-items:center;gap:8px;padding:12px 14px;background:linear-gradient(180deg,#f6f8fd,#fff);border-bottom:1px solid var(--g100)}
+.m-top .rc{margin-left:auto;font-size:.8rem;color:var(--g600);white-space:nowrap}
+.m-it{padding:12px 14px;border-bottom:1px dashed var(--g200)}
+.m-it:last-of-type{border-bottom:none}
+.m-no{font-weight:700;color:#26324d;font-size:.95rem;line-height:1.4;overflow-wrap:anywhere}
+.m-meta{font-size:.82rem;color:var(--g600);margin-top:3px;line-height:1.4;overflow-wrap:anywhere}
+.m-subj{margin-top:6px;line-height:1.5;font-size:.95rem;overflow-wrap:anywhere}
+.m-note{margin-top:5px;font-size:.82rem;color:var(--g600);overflow-wrap:anywhere}
+.m-foot{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--g50);flex-wrap:wrap}
+.m-foot .file-chips{flex:1;min-width:0}
+.m-empty{background:#fff;border-radius:16px;padding:48px 20px;text-align:center;color:var(--g400)}
+
+@media(max-width:768px){
+  body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+  .app-header{height:56px;padding:0 12px}
+  .app-main{padding:12px 12px 24px}
+  .stats-bar{flex-wrap:nowrap;gap:8px;margin-bottom:12px}
+  .stat-card{flex:1 1 0;min-width:0}
+  .control-card{padding:12px;border-radius:16px;margin-bottom:12px}
+  .toolbar{gap:8px}
+  .search-wrap{flex:1 1 100%;min-width:100%}
+  .toolbar .btn-p.admin-only{display:none!important}
+  #btn-sort{flex:1 1 100%;justify-content:center}
+  .filter-bar{gap:8px}
+  .filter-bar input{width:100%;flex:1 1 100%}
+  .filter-bar .btn{flex:1 1 auto;justify-content:center}
+  .filter-bar .flt-count{flex:1 1 100%;text-align:center}
+  input,textarea,select{font-size:16px!important}
+  .btn{padding:11px 18px}
+  .btn-sm{padding:9px 14px}
+  .table-card{display:none}
+  .m-list{display:flex;flex-direction:column;gap:12px}
+  .icon-btn{width:40px;height:40px}
+  .chip{padding:8px 12px;font-size:.82rem}
+  .fab{display:flex;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:150;align-items:center;gap:8px;padding:15px 24px;border:none;border-radius:50px;background:linear-gradient(135deg,#ee6c4d,#e0553a);color:#fff;font:700 1.05rem 'Sarabun',sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.38);cursor:pointer}
+  .fab:active{transform:scale(.96)}
+  .overlay{padding:0;align-items:flex-end}
+  .modal-box{max-width:100%!important;width:100%;border-radius:20px 20px 0 0;max-height:94vh;max-height:94dvh}
+  #form-overlay .modal-box,#preview-overlay .modal-box{height:100vh!important;height:100dvh!important;max-height:100vh;max-height:100dvh;border-radius:0}
+  .modal-head{padding:14px 16px;border-radius:0}
+  .modal-body{padding:16px}
+  .modal-foot{padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-radius:0;gap:8px}
+  .modal-foot .btn{flex:1;justify-content:center;padding:14px}
+  .modal-close{width:40px;height:40px}
+  .ocr-actions .btn{flex:1 1 100%;justify-content:center;padding:15px;font-size:1rem}
+  .upload-zone{padding:18px}
+  .file-row-del{padding:8px 12px}
+  .mic-btn{width:38px;height:38px;font-size:1.1rem}
+  .search-wrap .mic-btn{width:34px;height:34px}
+  .year-grid{grid-template-columns:repeat(2,1fr)}
+  #toasts{left:12px;right:12px;bottom:calc(88px + env(safe-area-inset-bottom))}
+  .toast{min-width:0}
+  .login-card{padding:32px 22px;margin:0 14px}
+}
+</style>
+</head>
+<body>
+ 
+<!-- Login -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo"><img class="app-logo" alt="โลโก้ สกร."></div>
+    <h2>ระบบธุรการ</h2>
+    <p>สกร.ระดับอำเภอฝาง</p>
+    <div id="login-err" class="login-err">⚠️ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+    <div class="inp-grp">
+      <span class="inp-icon">👤</span>
+      <input id="inp-u" type="text" placeholder="ชื่อผู้ใช้งาน" autocomplete="username"
+             onkeydown="if(event.key==='Enter')document.getElementById('inp-p').focus()">
+    </div>
+    <div class="inp-grp" style="margin-bottom:20px">
+      <span class="inp-icon">🔒</span>
+      <input id="inp-p" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+ 
+<!-- Loader -->
+<div id="loader"><div class="spinner"></div><span class="loader-msg" id="loader-msg">กำลังโหลด...</span></div>
+ 
+<!-- Toasts -->
+<div id="toasts"></div>
+ 
+<!-- App Shell -->
+<div id="app-shell" style="display:flex;flex-direction:column">
+  <header class="app-header">
+    <div class="hlogo"><img class="app-logo" alt="โลโก้ สกร."></div>
+    <div class="htitle">
+      <h1>ระบบธุรการ สกร.อำเภอฝาง</h1>
+      <p>ระบบจัดการหนังสือรับออนไลน์</p>
+    </div>
+    <div id="year-badge" class="year-badge" style="display:none">
+      ปี พ.ศ. <span id="year-txt">—</span>
+      <button class="btn-ych" onclick="openYearModal()">เปลี่ยนปี</button>
+    </div>
+    <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+  </header>
+ 
+  <main class="app-main">
+    <div class="stats-bar">
+      <div class="stat-card"><span class="stat-icon ic-blue">📥</span><div><div class="stat-label">หนังสือทั้งหมด</div><div class="stat-value" id="s-total">0</div></div></div>
+      <div class="stat-card"><span class="stat-icon ic-green">📅</span><div><div class="stat-label">เดือนนี้</div><div class="stat-value" id="s-month">0</div></div></div>
+      <div class="stat-card"><span class="stat-icon ic-orange">📎</span><div><div class="stat-label">มีไฟล์แนบ</div><div class="stat-value" id="s-files">0</div></div></div>
+    </div>
+ 
+    <div class="control-card">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input id="search" type="search" placeholder="ค้นหา เลขรับ, เลขที่หนังสือ, หน่วยงาน, เรื่อง...">
+        <button type="button" class="mic-btn" data-mic="search" title="พูดเพื่อค้นหา">🎤</button>
+        <span class="search-icon">🔍</span>
+      </div>
+      <button class="btn btn-sec" id="btn-sort" onclick="toggleSort()">⬇️ ล่าสุดก่อน</button>
+      <button class="btn btn-p admin-only" onclick="openAddModal()">＋ เพิ่มหนังสือรับ</button>
+    </div>
+ 
+    <div class="filter-bar">
+      <input id="flt-month" list="dl-flt-month" type="text" autocomplete="off" placeholder="📅 ทุกเดือน (พิมพ์หรือเลือก)" title="กรองตามเดือนที่รับหนังสือ" oninput="applyFilters()">
+      <datalist id="dl-flt-month"><option value="มกราคม"><option value="กุมภาพันธ์"><option value="มีนาคม"><option value="เมษายน"><option value="พฤษภาคม"><option value="มิถุนายน"><option value="กรกฎาคม"><option value="สิงหาคม"><option value="กันยายน"><option value="ตุลาคม"><option value="พฤศจิกายน"><option value="ธันวาคม"></datalist>
+      <input id="flt-agency" list="dl-flt-agency" type="text" autocomplete="off" placeholder="🏢 ทุกหน่วยงาน (พิมพ์หรือเลือก)" title="พิมพ์บางส่วนของชื่อหน่วยงานได้" oninput="applyFilters()">
+      <datalist id="dl-flt-agency"></datalist>
+      <button class="btn btn-sec btn-sm" onclick="clearFilters()">✖ ล้างตัวกรอง</button>
+      <button class="btn btn-warn btn-sm admin-only" onclick="openMergeModal()">🧹 รวม/เปลี่ยนชื่อหน่วยงาน</button>
+      <span class="flt-count" id="flt-count"></span>
+      <span style="flex:1"></span>
+      <button class="btn btn-sec btn-sm" onclick="printReport()">🖨️ พิมพ์ / PDF</button>
+      <button class="btn btn-ok btn-sm" onclick="exportExcel()">📊 ส่งออก Excel</button>
+    </div>
+    </div>
+ 
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <colgroup>
+            <col style="width:8%"><col style="width:12.5%"><col style="width:8.5%"><col style="width:13.5%"><col style="width:22%">
+            <col style="width:8.5%"><col style="width:9.5%"><col style="width:9.5%"><col id="colg-act" class="admin-only" style="width:96px">
+          </colgroup>
+          <thead><tr>
+            <th>เลขรับ</th><th>เลขที่หนังสือ</th><th>ลงวันที่</th>
+            <th>จากหน่วยงาน</th><th>เรื่อง</th><th>วันที่รับ</th>
+            <th>หมายเหตุ</th><th>ไฟล์แนบ</th>
+            <th id="col-act" class="admin-only th-c">จัดการ</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="m-list" class="m-list"></div>
+  </main>
+  <button type="button" class="fab admin-only" onclick="quickCapture()">📷 ลงหนังสือ</button>
+</div>
+ 
+<!-- Year Modal -->
+<div class="overlay" id="year-overlay">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-head">
+      <h3>📅 เลือกปี พ.ศ.</h3>
+      <button class="modal-close" onclick="closeYearModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="year-grid" id="year-grid"></div>
+      <div id="add-year-wrap" class="admin-only">
+        <div class="add-year-row">
+          <input id="new-year" type="number" placeholder="ปี พ.ศ. เช่น 2568" min="2500" max="2650">
+          <button class="btn btn-p btn-sm" onclick="createNewYear()">➕ เพิ่มปี</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- Form Modal -->
+<div class="overlay" id="form-overlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="form-title">เพิ่มหนังสือรับ</h3>
+      <button class="modal-close" onclick="closeFormModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id">
+      <div class="ocr-box" id="ocr-box">
+        <div class="ocr-actions">
+          <button type="button" class="btn btn-cam" id="btn-cam" onclick="openCamera(0,'ocr')">📷 ถ่ายรูปหนังสือ</button>
+          <button type="button" class="btn btn-sec" onclick="S.ocrTarget=0; g('cam-inp').click()">📱 ใช้กล้องของเครื่อง</button>
+          <button type="button" class="btn btn-p" id="btn-ocr" onclick="S.ocrTarget=0; g('ocr-inp').click()">🪄 เลือกไฟล์ (PDF/รูป)</button>
+          <span id="ocr-status"></span>
+        </div>
+        <div id="ocr-warn" class="ocr-warn"></div>
+        <input type="file" id="ocr-inp" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" style="display:none" onchange="var _f=this.files[0], _t=S.ocrTarget||0; S.ocrTarget=0; this.value=''; runOcr(_f, _t, false)">
+        <input type="file" id="cam-inp" accept="image/*" capture="environment" style="display:none" onchange="var _f=this.files[0], _t=S.ocrTarget||0; S.ocrTarget=0; this.value=''; runOcr(_f, _t, true)">
+        <input type="file" id="cam-add" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(this.files[0]); this.value=''">
+        <details id="ocr-prev-wrap" style="display:none;margin-top:10px;font-size:.8rem"><summary>🔍 ดูเอกสารที่อัปโหลด (เทียบกับช่องที่กรอก)</summary><div id="ocr-prev"></div></details>
+        <details id="ocr-raw-wrap" style="display:none"><summary>ดูข้อความที่ระบบอ่านได้</summary><pre id="ocr-raw"></pre></details>
+      </div>
+      <div class="fgrid">
+        <div class="fg full">
+          <label>จากหน่วยงาน <span class="req">*</span><button type="button" class="mic-btn" data-mic="f-จากหน่วยงาน" title="พูดแทนการพิมพ์">🎤</button></label>
+          <input id="f-จากหน่วยงาน" type="text">
+          <div id="ag-suggest" class="ag-suggest"></div>
+        </div>
+        <div class="fg">
+          <label>เลขรับ</label>
+          <input id="f-เลขรับ" type="text" placeholder="สร้างอัตโนมัติ" readonly>
+        </div>
+        <div class="fg">
+          <label>เลขที่หนังสือ <span class="req">*</span></label>
+          <input id="f-เลขที่หนังสือ" type="text">
+          <div id="no-chips" class="pf-chips"></div>
+        </div>
+        <div class="fg">
+          <label>ลงวันที่ <span class="req">*</span></label>
+          <input id="f-ลงวันที่" type="date">
+        </div>
+        <div class="fg">
+          <label>วันที่รับ <span class="req">*</span></label>
+          <input id="f-วันที่รับ" type="date">
+        </div>
+        <div class="fg full">
+          <label>เรื่อง <span class="req">*</span><button type="button" class="mic-btn" data-mic="f-เรื่อง" title="พูดแทนการพิมพ์">🎤</button></label>
+          <textarea id="f-เรื่อง" rows="2"></textarea>
+        </div>
+        <div class="fg full">
+          <label>หมายเหตุ<button type="button" class="mic-btn" data-mic="f-หมายเหตุ" title="พูดแทนการพิมพ์">🎤</button></label>
+          <input id="f-หมายเหตุ" type="text">
+          <div id="mic-live" class="mic-live"></div>
+        </div>
+        <div class="fg full">
+          <div id="items-extra"></div>
+          <button type="button" class="btn btn-sec btn-sm" style="align-self:flex-start" onclick="addItem()">➕ เพิ่มหนังสืออีกฉบับในเลขรับนี้</button>
+          <div class="ocr-sub" style="margin:6px 0 0">1 เลขรับ มีได้หลายหนังสือ — แต่ละฉบับมีเลขที่ ศธ / ลงวันที่ / จากหน่วยงาน / เรื่อง ของตัวเอง (วันที่รับ และไฟล์แนบใช้ร่วมกันทั้งเลขรับ)</div>
+        </div>
+      </div>
+ 
+      <div style="margin-top:18px">
+        <p style="font-size:.88rem;font-weight:600;color:var(--g600);margin-bottom:10px">📎 แนบไฟล์</p>
+        <div class="upload-zone" id="upload-zone"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave()"
+             ondrop="onDrop(event)" onclick="document.getElementById('file-inp').click()">
+          <div style="font-size:2rem">☁️</div>
+          <p>ลากไฟล์มาวาง หรือ <strong style="color:var(--p)">คลิกเพื่อเลือก</strong></p>
+          <p style="font-size:.78rem;margin-top:4px">รองรับทุกประเภทไฟล์ · สูงสุด 20 MB ต่อไฟล์</p>
+          <input type="file" id="file-inp" multiple style="display:none" onchange="addFiles(this.files)">
+        </div>
+        <button type="button" class="btn btn-cam btn-sm" style="margin-top:10px" onclick="openCamera(0,'attach')">📷 ถ่ายรูปเพิ่ม (หน้าถัดไป/ไฟล์แนบ)</button>
+        <div class="upload-progress" id="upload-prog">
+          <span id="upload-msg">กำลังอัพโหลด...</span>
+          <div class="prog-bar-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+        </div>
+        <div id="file-list-ui" class="file-list-ui"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-sec" onclick="closeFormModal()">ยกเลิก</button>
+      <button class="btn btn-p" id="btn-save" onclick="submitForm()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- Delete Confirm Modal -->
+<div class="overlay" id="merge-overlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>🧹 รวม / เปลี่ยนชื่อหน่วยงาน</h3>
+      <button class="modal-close" onclick="closeMergeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="ocr-sub" style="margin-top:0">ติ๊กเลือกชื่อที่ต้องการรวมได้เอง (เลือกกี่ชื่อก็ได้) แล้วพิมพ์หรือเลือก "ชื่อที่ถูกต้อง" ด้านล่าง กดรวมแล้วทุกรายการของปีนี้จะถูกแก้เป็นชื่อนั้น — ติ๊กชื่อเดียวก็ใช้เปลี่ยนชื่อได้ ชื่อที่ระบบเห็นว่าคล้ายกันจะอยู่รวมกลุ่มด้านบน</div>
+      <input id="mg-filter" class="mg-custom" style="margin:0 0 10px" type="text" placeholder="🔍 ค้นหาชื่อหน่วยงาน..." oninput="renderMergeList()">
+      <div id="merge-list"></div>
+    </div>
+    <div class="mg-target">
+      <div class="mg-trow">
+        <label for="mg-target">ชื่อที่ถูกต้อง:</label>
+        <input id="mg-target" class="mg-custom" style="margin:0" list="dl-mg-target" type="text" autocomplete="off" placeholder="เลือกจากที่ติ๊ก หรือพิมพ์ชื่อเอง" oninput="this.dataset.auto='0'; mgSummary()">
+        <datalist id="dl-mg-target"></datalist>
+      </div>
+      <div id="mg-summary" class="flt-count" style="margin-top:6px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-sec" onclick="closeMergeModal()">ปิด</button>
+      <button class="btn btn-p" id="btn-merge" onclick="applyMerge()">✔ รวม / เปลี่ยนชื่อ</button>
+    </div>
+  </div>
+</div>
+ 
+<div class="overlay" id="del-overlay">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-body" style="padding:32px 28px 24px">
+      <div class="del-icon-wrap">🗑️</div>
+      <div class="del-title">ยืนยันการลบ</div>
+      <div class="del-sub">คุณต้องการลบหนังสือรับรายการนี้ใช่หรือไม่?<br>การกระทำนี้<strong style="color:var(--err)">ไม่สามารถเรียกคืนได้</strong></div>
+      <div class="del-divider"></div>
+      <div class="del-actions">
+        <button class="del-cancel" onclick="closeDelModal()">ยกเลิก</button>
+        <button class="del-confirm" id="del-confirm-btn" onclick="doDelete()">🗑️ ลบเลย</button>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- Preview Modal -->
+<div class="overlay" id="preview-overlay">
+  <div class="modal-box" style="max-width:920px;height:92vh">
+    <div class="modal-head">
+      <h3 id="preview-title">📄 ตัวอย่างไฟล์</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-sec btn-sm" onclick="downloadFile()">⬇️ ดาวน์โหลด</button>
+        <button class="modal-close" onclick="closePreview()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:0;flex:1;overflow:hidden">
+      <iframe id="preview-frame" class="preview-frame" src=""></iframe>
+    </div>
+  </div>
+</div>
+ 
+<!-- Live camera -->
+<div class="overlay" id="cam-overlay" style="background:#000;z-index:3000;padding:0;align-items:stretch">
+  <div class="cam-wrap">
+    <video id="cam-video" autoplay playsinline muted></video>
+    <div class="cam-hint">วางหนังสือให้เต็มกรอบ ให้เห็นส่วนหัวชัดๆ แล้วกดปุ่มกลม</div>
+    <div class="cam-bar">
+      <button type="button" class="cam-side" onclick="closeCamera()">✕ ยกเลิก</button>
+      <button type="button" class="cam-shutter" onclick="snapCamera()" aria-label="ถ่ายรูป"></button>
+      <button type="button" class="cam-side" onclick="flipCamera()">🔄 สลับกล้อง</button>
+    </div>
+  </div>
+</div>
+
+<div id="print-root"></div>
+ 
+<script>
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+/* ★★★ ต้องแก้ 1 จุด: ใส่ลิงก์ Web app (ลงท้ายด้วย /exec) ของ Apps Script ที่ Deploy ไว้ ★★★ */
+var API_URL = 'https://script.google.com/a/macros/cmi.nfe.go.th/s/AKfycbwgLpgYZaqagN45813lYqlNb7XezuzRee-fWmmkJuZUcOAWxwJdFJ3tVcxhaTIwV7E/exec';
+
+var S = {
+  role: null, u: null, p: null, year: null, years: [], records: [],
+  files: [],        // { name, mimeType, base64?, url? }
+  extra: [],        // หนังสือฉบับที่ 2, 3, ... ในเลขรับเดียวกัน
+  agencyDir: [],    // ทะเบียนหน่วยงาน + รูปแบบเลขที่หนังสือ { agency, prefix, count, last }
+  ocrTarget: 0,     // ฉบับที่ OCR จะกรอกให้ (0 = ฉบับแรก)
+  sortAsc: false,
+  previewUrl: null,
+  editId: null
+};
+ 
+function loadLogo() {
+  // แสดงโลโก้ที่ฝังไว้ทันที (ไม่ต้องรอ server) แล้วค่อยลองอัปเกรดเป็นไฟล์ใน Drive ถ้าตั้งค่า LOGO_FILE_ID ไว้
+  document.querySelectorAll('img.app-logo').forEach(function(im){ im.src = LOGO_FALLBACK; });
+  if (!S.role) return;   // ต้องล็อกอินก่อนจึงจะขอโลโก้จาก Drive ได้
+  callAsync('getLogo', {}).then(function(r) {
+    if (r && r.success && r.src) {
+      document.querySelectorAll('img.app-logo').forEach(function(im){ im.src = r.src; });
+    }
+  }).catch(function(){});
+}
+ 
+var REQ = ['เลขที่หนังสือ','ลงวันที่','จากหน่วยงาน','เรื่อง','วันที่รับ'];
+ 
+/* ════════════════════════════════════════
+   AUTH
+════════════════════════════════════════ */
+async function login() {
+  var u = val('inp-u').trim(), p = val('inp-p');
+  g('login-err').style.display = 'none';
+  if (!u || !p) { g('login-err').style.display = 'block'; return; }
+  if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(API_URL)) { toast('ยังไม่ได้ตั้งค่า API_URL ในไฟล์ index.html', 'err'); return; }
+  var btn = document.querySelector('.btn-login');
+  btn.disabled = true; btn.textContent = '⏳ กำลังตรวจสอบ...';
+  S.u = u; S.p = p;
+  try {
+    var r = await callAsync('login', {});
+    S.role = r.role;
+    enter();
+  } catch (e) {
+    S.u = null; S.p = null;
+    if (e && e.code === 'AUTH') { g('login-err').style.display = 'block'; g('inp-p').value = ''; g('inp-p').focus(); }
+    else toast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: ' + (e && e.message ? e.message : e), 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+  }
+}
+ 
+function enter() {
+  g('login-screen').style.display = 'none';
+  g('app-shell').style.display    = 'flex';
+  document.querySelectorAll('.admin-only').forEach(function(e){
+    e.style.display = S.role==='admin' ? '' : 'none';
+  });
+  initYears();
+  loadAgencyDir();
+  loadLogo();
+}
+ 
+function logout() {
+  S = { role:null,u:null,p:null,year:null,years:[],records:[],files:[],extra:[],agencyDir:[],ocrTarget:0,sortAsc:false,previewUrl:null,editId:null };
+  g('inp-u').value=''; g('inp-p').value='';
+  g('app-shell').style.display  = 'none';
+  g('year-badge').style.display = 'none';
+  g('login-screen').style.display = 'flex';
+  g('inp-u').focus();
+}
+ 
+/* ════════════════════════════════════════
+   YEAR
+════════════════════════════════════════ */
+function initYears() {
+  call('getAvailableYears').then(function(r){
+    if (!r.success) return toast('โหลดปีไม่สำเร็จ','err');
+    S.years = r.years || [];
+    if (!S.years.length && S.role==='admin') createNewYear(true);
+    else if (!S.years.length) toast('ยังไม่มีข้อมูล กรุณาติดต่อแอดมิน','warn');
+    else openYearModal();
+  });
+}
+ 
+function openYearModal() {
+  var grid = g('year-grid');
+  grid.innerHTML = '';
+  S.years.forEach(function(y){
+    var b = document.createElement('button');
+    b.className = 'year-card' + (y===S.year ? ' active' : '');
+    b.textContent = 'พ.ศ. ' + y;
+    b.onclick = function(){ selectYear(y); };
+    grid.appendChild(b);
+  });
+  g('new-year').value = new Date().getFullYear()+543;
+  var aw = g('add-year-wrap');
+  if (aw) aw.style.display = S.role==='admin' ? '' : 'none';
+  g('year-overlay').classList.add('active');
+}
+function closeYearModal() { g('year-overlay').classList.remove('active'); }
+ 
+function selectYear(y) {
+  S.year = y;
+  g('year-txt').textContent = y;
+  g('year-badge').style.display = '';
+  closeYearModal();
+  loadData();
+}
+ 
+function createNewYear(auto) {
+  var y = auto ? new Date().getFullYear()+543 : parseInt(g('new-year').value,10);
+  if (!y||y<2500||y>2650) return toast('ปี พ.ศ. ไม่ถูกต้อง','warn');
+  call('createYearSheet',{year:y}).then(function(r){
+    if (!r.success) return toast('สร้างปีไม่สำเร็จ: '+r.error,'err');
+    if (!S.years.includes(y)) { S.years.unshift(y); S.years.sort(function(a,b){return b-a;}); }
+    selectYear(y);
+  });
+}
+ 
+/* ════════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+function loadData() {
+  loader(true,'กำลังโหลดข้อมูล...');
+  call('getData',{year:S.year}).then(function(r){
+    if (r.success) { S.records = r.data||[]; renderAll(); }
+    else toast('โหลดไม่สำเร็จ: '+r.error,'err');
+  }).finally(function(){ loader(false); });
+}
+ 
+function renderAll() { updateStats(); populateAgencyFilter(); applyFilters(); }
+ 
+function updateStats() {
+  var now=new Date(), m=now.getMonth(), yr=now.getFullYear();
+  var month=0, files=0;
+  S.records.forEach(function(r){
+    if (r['วันที่รับ']) { var d=new Date(r['วันที่รับ']); if (d.getMonth()===m&&d.getFullYear()===yr) month++; }
+    if (r['ลิงก์ไฟล์']&&r['ลิงก์ไฟล์']!=='-') files++;
+  });
+  g('s-total').textContent = S.records.length;
+  g('s-month').textContent = month;
+  g('s-files').textContent = files;
+}
+ 
+function getSorted() {
+  return S.records.slice().sort(function(a,b){
+    var na=nPart(a['เลขรับ']), nb=nPart(b['เลขรับ']);
+    return S.sortAsc ? na-nb : nb-na;
+  });
+}
+ 
+function nPart(s) {
+  var p=String(s||'').split('/');
+  return p.length>1 ? (parseInt(p[1],10)||0) : 0;
+}
+ 
+var HOV = { cur: null };
+
+/* รายการแบบการ์ด (แสดงเฉพาะจอมือถือ) */
+function renderCards(rows) {
+  var box = g('m-list'); if (!box) return;
+  if (!rows.length) { box.innerHTML = '<div class="m-empty"><span class="empty-icon">📭</span>ไม่มีข้อมูลหนังสือรับ</div>'; return; }
+  var isAdmin = S.role === 'admin';
+  box.innerHTML = rows.map(function(item){
+    var items = recItems(item), k = items.length;
+    var chips = parseFiles(item['ลิงก์ไฟล์']).map(function(f){
+      return '<span class="chip" onclick="openPreview(\''+esc(f.url)+'\',\''+esc(f.name)+'\')"><span>📄</span>'+esc(sName(f.name, 20))+'</span>';
+    }).join('');
+    var h = '<div class="m-card"><div class="m-top"><span class="badge badge-blue">'+esc(item['เลขรับ']||'—')+'</span>'
+      + (k > 1 ? '<span class="tag-n" style="margin:0">'+k+' ฉบับ</span>' : '')
+      + '<span class="rc">รับ '+fmtD(item['วันที่รับ'])+'</span></div>';
+    items.forEach(function(it, i){
+      h += '<div class="m-it"><div class="m-no">'+(k > 1 ? '<span class="doc-idx">'+(i+1)+'</span>' : '')+esc(it['เลขที่หนังสือ']||'—')+'</div>'
+        + '<div class="m-meta">ลงวันที่ '+fmtD(it['ลงวันที่'])+' · '+esc(it['จากหน่วยงาน']||'—')+'</div>'
+        + '<div class="m-subj">'+(esc(it['เรื่อง'])||'<span class="dash">—</span>')+'</div>'
+        + (it['หมายเหตุ'] ? '<div class="m-note">📝 '+esc(it['หมายเหตุ'])+'</div>' : '')
+        + '</div>';
+    });
+    if (chips || isAdmin) {
+      h += '<div class="m-foot"><div class="file-chips">'+chips+'</div>';
+      if (isAdmin) h += '<div class="row-act"><button class="icon-btn edit" title="แก้ไข" onclick="openEditModal(\''+item['id']+'\')">✏️</button>'
+        + '<button class="icon-btn del" title="ลบ" onclick="confirmDel(\''+item['id']+'\')">🗑️</button></div>';
+      h += '</div>';
+    }
+    return h + '</div>';
+  }).join('');
+}
+ 
+function renderTable(data) {
+  var tbody = g('tbody');
+  var rows = data || getSorted();
+  HOV.cur = null;
+  renderCards(rows);
+  if (!rows.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="9"><span class="empty-icon">📭</span>ไม่มีข้อมูลหนังสือรับ</td></tr>';
+    return;
+  }
+  var isAdmin = S.role==='admin';
+  tbody.innerHTML = rows.map(function(item, gi){
+    var chips = parseFiles(item['ลิงก์ไฟล์']).map(function(f){
+      return '<span class="chip" onclick="openPreview(\''+esc(f.url)+'\',\''+esc(f.name)+'\')"><span>📄</span>'+esc(sName(f.name))+'</span>';
+    }).join('');
+    var items = recItems(item), k = items.length;
+    var rs = k > 1 ? ' rowspan="'+k+'"' : '';
+    var html = '';
+    items.forEach(function(it, i){
+      html += '<tr data-g="'+gi+'" class="' + (k > 1 ? 'g-multi ' : '') + (i === k-1 ? 'g-last' : '') + '">';
+      if (i === 0) html += '<td class="num-col"'+rs+'><span class="badge badge-blue">'+esc(item['เลขรับ']||'—')+'</span>'
+        + (k > 1 ? '<span class="tag-n">'+k+' ฉบับ</span>' : '') + '</td>';
+      html += '<td class="it"><span class="doc-no">' + (k > 1 ? '<span class="doc-idx">'+(i+1)+'</span>' : '') + esc(it['เลขที่หนังสือ']||'—') + '</span></td>'
+        + '<td class="it"><span class="dt">'+fmtD(it['ลงวันที่'])+'</span></td>'
+        + '<td class="it"><div class="ag">'+esc(it['จากหน่วยงาน']||'—')+'</div></td>'
+        + '<td class="it"><div class="subj">'+(esc(it['เรื่อง'])||'<span class="dash">—</span>')+'</div></td>';
+      if (i === 0) {
+        html += '<td'+rs+'><span class="dt">'+fmtD(item['วันที่รับ'])+'</span></td>';
+      }
+      html += '<td class="it"><div class="note">'+(esc(it['หมายเหตุ']||'') || '<span class="dash">—</span>')+'</div></td>';
+      if (i === 0) {
+        html += '<td'+rs+'>'+(chips?'<div class="file-chips">'+chips+'</div>':'<span class="dash">—</span>')+'</td>';
+        if (isAdmin) html += '<td'+rs+'><div class="row-act"><button class="icon-btn edit" title="แก้ไข" onclick="openEditModal(\''+item['id']+'\')">✏️</button>'
+          + '<button class="icon-btn del" title="ลบ" onclick="confirmDel(\''+item['id']+'\')">🗑️</button></div></td>';
+      }
+      html += '</tr>';
+    });
+    return html;
+  }).join('');
+}
+ 
+(function(){
+  var tb = g('tbody');
+  function setHov(id, on) {
+    if (id == null) return;
+    tb.querySelectorAll('tr[data-g="'+id+'"]').forEach(function(r){ r.classList.toggle('hov', on); });
+  }
+  tb.addEventListener('mouseover', function(ev){
+    var tr = ev.target.closest ? ev.target.closest('tr[data-g]') : null;
+    var id = tr ? tr.getAttribute('data-g') : null;
+    if (id === HOV.cur) return;
+    setHov(HOV.cur, false); HOV.cur = id; setHov(id, true);
+  });
+  tb.addEventListener('mouseleave', function(){ setHov(HOV.cur, false); HOV.cur = null; });
+})();
+ 
+/* search */
+g('search').addEventListener('input', applyFilters);
+ 
+/* sort */
+function toggleSort() {
+  S.sortAsc = !S.sortAsc;
+  g('btn-sort').textContent = S.sortAsc ? '⬆️ เก่าสุดก่อน' : '⬇️ ล่าสุดก่อน';
+  applyFilters();
+}
+ 
+/* ════════════════════════════════════════
+   AUTOCOMPLETE (ฟีเจอร์จดจำประวัติที่พิมพ์)
+════════════════════════════════════════ */
+function setupAutocomplete() {
+  ['จากหน่วยงาน', 'หมายเหตุ'].forEach(function(f) {
+    var input = g('f-' + f);
+    if (!input) return;
+ 
+    var listId = 'dl-' + f;
+    input.setAttribute('list', listId);
+ 
+    var dl = g(listId);
+    if (!dl) {
+      dl = document.createElement('datalist');
+      dl.id = listId;
+      document.body.appendChild(dl);
+    }
+    dl.innerHTML = '';
+ 
+    var unique = [];
+    function add(val) { val = String(val || '').trim(); if (val && unique.indexOf(val) === -1) unique.push(val); }
+    S.records.forEach(function(r) { recItems(r).forEach(function(it){ add(it[f]); }); });
+    if (f === 'จากหน่วยงาน') S.agencyDir.forEach(function(r){ add(r.agency); });
+ 
+    unique.forEach(function(val) {
+      var opt = document.createElement('option');
+      opt.value = val;
+      dl.appendChild(opt);
+    });
+  });
+}
+ 
+/* ════════════════════════════════════════
+   FORM MODAL
+════════════════════════════════════════ */
+function openAddModal() {
+  S.editId = null; S.files = []; S.extra = [];
+  g('form-title').textContent = '➕ เพิ่มหนังสือรับ';
+  g('edit-id').value = '';
+  ['เลขรับ','เลขที่หนังสือ','ลงวันที่','วันที่รับ','จากหน่วยงาน','เรื่อง','หมายเหตุ'].forEach(function(f){
+    var e=g('f-'+f); if(e) e.value='';
+  });
+  resetOcrUI(true);
+  suggestAgency();
+  g('f-เลขที่หนังสือ').dataset.autoPrefix = ''; g('no-chips').innerHTML = '';
+ 
+  setupAutocomplete();
+ 
+  renderFileList();
+  renderExtras();
+  g('form-overlay').classList.add('active');
+  try { if (!window.matchMedia('(pointer:coarse)').matches) g('f-จากหน่วยงาน').focus(); } catch (e) {}
+}
+ 
+function openEditModal(id) {
+  var item = S.records.find(function(r){ return r['id']===id; });
+  if (!item) return;
+  var items = recItems(item);
+  S.editId = id; S.files = parseFiles(item['ลิงก์ไฟล์']); S.extra = items.slice(1);
+  g('form-title').textContent = '✏️ แก้ไขหนังสือรับ';
+  g('edit-id').value = id;
+  setv('f-เลขรับ',         item['เลขรับ']);
+  setv('f-เลขที่หนังสือ',  items[0]['เลขที่หนังสือ']);
+  setv('f-ลงวันที่',       toInput(items[0]['ลงวันที่']));
+  setv('f-วันที่รับ',      toInput(item['วันที่รับ']));
+  setv('f-จากหน่วยงาน',   items[0]['จากหน่วยงาน']);
+  setv('f-เรื่อง',         items[0]['เรื่อง']);
+  setv('f-หมายเหตุ',       items[0]['หมายเหตุ']);
+  resetOcrUI(false);
+  suggestAgency();
+  g('f-เลขที่หนังสือ').dataset.autoPrefix = '';
+  applyAgencyPrefix(g('f-จากหน่วยงาน'), false);
+ 
+  setupAutocomplete();
+ 
+  renderFileList();
+  renderExtras();
+  g('form-overlay').classList.add('active');
+}
+ 
+/* ════════════════════════════════════════
+   SUBJECT (เรื่อง) — MULTI-ITEM HANDLING
+════════════════════════════════════════ */
+function closeFormModal() { g('form-overlay').classList.remove('active'); }
+ 
+function validate() {
+  var ok=true; S.vmsg='';
+  REQ.forEach(function(f){
+    var e=g('f-'+f); if(!e) return;
+    var bad=!e.value.trim();
+    e.classList.toggle('bad',bad);
+    if(bad) ok=false;
+  });
+  var dn = g('f-เลขที่หนังสือ');
+  if (dn && dn.value.trim() && docNoIncomplete(dn.value, dn.dataset.autoPrefix)) { dn.classList.add('bad'); ok = false; S.vmsg = 'กรุณากรอกส่วนท้ายหลังเครื่องหมาย / ของเลขที่หนังสือ (ตัวเลขหรือตัวอักษร)'; }
+  collectExtras();
+  S.extra.forEach(function(it, i){
+    ['no','date','from','subj'].forEach(function(s){
+      var e = g('it-'+i+'-'+s); if (!e) return;
+      var bad = !e.value.trim() || (s === 'no' && docNoIncomplete(e.value, e.dataset.autoPrefix));
+      e.classList.toggle('bad', bad);
+      if (bad) { ok = false; if (s === 'no' && e.value.trim()) S.vmsg = 'กรุณากรอกส่วนท้ายหลังเครื่องหมาย / ของเลขที่หนังสือ (ตัวเลขหรือตัวอักษร)'; }
+    });
+  });
+  return ok;
+}
+ 
+/* Submit: upload files first → then save data */
+async function submitForm() {
+  if (document.querySelector('.ocr-uncertain') && !S.ocrConfirmed) {
+    S.ocrConfirmed = true;
+    toast('⚠️ กรุณาตรวจสอบอีกรอบ — ยังมีช่องสีส้มที่ยังไม่ได้ตรวจ (ถ้าถูกต้องแล้วกดบันทึกอีกครั้ง)','warn');
+    return;
+  }
+  if (!validate()) return toast(S.vmsg || 'กรุณากรอกข้อมูลที่จำเป็น','warn');
+ 
+  var btn = g('btn-save');
+  btn.disabled = true; btn.textContent = '⏳ กำลังบันทึก...';
+ 
+  try {
+    // 1. Upload new files one by one
+    for (var i=0; i<S.files.length; i++) {
+      var f = S.files[i];
+      if (f.url) continue; // already uploaded
+      showUploadProg(f.name, i+1, S.files.length);
+      var r = await callAsync('uploadFile', { fileData: { name: f.name, mimeType: f.mimeType, base64: f.base64 } });
+      if (!r.success) throw new Error('อัพโหลดไฟล์ไม่สำเร็จ: ' + r.error);
+      S.files[i] = { name: r.file.name, url: r.file.url };
+    }
+    hideUploadProg();
+ 
+    // 2. Build data payload (no base64 — only url references)
+    collectExtras();
+    var items = [{ 'เลขที่หนังสือ': val('f-เลขที่หนังสือ').trim(), 'ลงวันที่': val('f-ลงวันที่'),
+                   'จากหน่วยงาน': val('f-จากหน่วยงาน').trim(), 'เรื่อง': val('f-เรื่อง').trim(),
+                   'หมายเหตุ': val('f-หมายเหตุ').trim() }].concat(S.extra);
+    var data = {
+      'เลขที่หนังสือ': items[0]['เลขที่หนังสือ'],
+      'ลงวันที่':      items[0]['ลงวันที่'],
+      'จากหน่วยงาน':  items[0]['จากหน่วยงาน'],
+      'เรื่อง':        items.length === 1 ? items[0]['เรื่อง'] : JSON.stringify(items),
+      'วันที่รับ':     val('f-วันที่รับ'),
+      'หมายเหตุ':     items[0]['หมายเหตุ']
+    };
+    if (S.editId) data['id'] = S.editId;
+ 
+    // Attach file links as JSON string
+    // ส่งเสมอ (ถ้าลบไฟล์ออกหมดจะได้ล้างลิงก์จริง ไม่ใช่คงค่าเดิม)
+    data['ลิงก์ไฟล์'] = S.files.length
+      ? JSON.stringify(S.files.map(function(f){ return {name:f.name,url:f.url}; }))
+      : '';
+ 
+    var action = S.editId ? 'updateData' : 'addData';
+    var r2 = await callAsync(action, { data: data, year: S.year });
+    if (!r2.success) throw new Error(r2.error);
+    learnLocal(items, !S.editId);
+ 
+    toast(S.editId ? 'แก้ไขสำเร็จ ✓' : 'เพิ่มข้อมูลสำเร็จ ✓', 'ok');
+    closeFormModal();
+    loadData();
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: '+e.message, 'err');
+    hideUploadProg();
+  } finally {
+    btn.disabled=false; btn.textContent='💾 บันทึก';
+  }
+}
+ 
+var _delId = null;
+ 
+function confirmDel(id) {
+  _delId = id;
+  g('del-overlay').classList.add('active');
+}
+ 
+function closeDelModal() {
+  _delId = null;
+  g('del-overlay').classList.remove('active');
+}
+ 
+function doDelete() {
+  if (!_delId) return;
+  var id = _delId;
+  var btn = g('del-confirm-btn');
+  btn.disabled = true; btn.textContent = '⏳ กำลังลบ...';
+ 
+  call('deleteData', { id: id, year: S.year }).then(function(r) {
+    if (r.success) {
+      S.records = S.records.filter(function(x){ return x['id'] !== id; });
+      renderAll();
+      toast('ลบข้อมูลสำเร็จ', 'ok');
+    } else {
+      toast('ลบไม่สำเร็จ: ' + r.error, 'err');
+    }
+  }).finally(function() {
+    btn.disabled = false; btn.textContent = '🗑️ ลบเลย';
+    closeDelModal();
+  });
+}
+ 
+/* ════════════════════════════════════════
+   FILE HANDLING
+════════════════════════════════════════ */
+function addFiles(fileList) {
+  Array.from(fileList).forEach(function(f){
+    if (f.size > 20*1024*1024) { toast('"'+f.name+'" ขนาดเกิน 20 MB','warn'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      S.files.push({ name:f.name, mimeType:f.type||'application/octet-stream', base64:e.target.result.split(',')[1] });
+      renderFileList();
+    };
+    reader.readAsDataURL(f);
+  });
+  g('file-inp').value = '';
+}
+ 
+function removeFile(i) { S.files.splice(i,1); renderFileList(); }
+ 
+function renderFileList() {
+  g('file-list-ui').innerHTML = S.files.map(function(f,i){
+    return '<div class="file-row">'
+      +'<span>'+fileIcon(f.name)+'</span>'
+      +'<span class="file-row-name">'+esc(f.name)+'</span>'
+      +'<span class="file-row-status">'+(f.url?'✅ อัพโหลดแล้ว':'⏳ รอบันทึก')+'</span>'
+      +'<button class="file-row-del" onclick="removeFile('+i+')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+ 
+function showUploadProg(name, cur, total) {
+  var prog = g('upload-prog');
+  prog.style.display = 'block';
+  g('upload-msg').textContent = 'กำลังอัพโหลด ('+cur+'/'+total+'): '+name;
+  g('prog-bar').style.width = Math.round((cur/total)*100)+'%';
+}
+function hideUploadProg() {
+  g('upload-prog').style.display = 'none';
+  g('prog-bar').style.width = '0';
+}
+ 
+function onDragOver(e)  { e.preventDefault(); g('upload-zone').classList.add('drag-over'); }
+function onDragLeave()  { g('upload-zone').classList.remove('drag-over'); }
+function onDrop(e)      { e.preventDefault(); g('upload-zone').classList.remove('drag-over'); addFiles(e.dataTransfer.files); }
+ 
+/* ════════════════════════════════════════
+   FILE PREVIEW
+════════════════════════════════════════ */
+function openPreview(url, name) {
+  S.previewUrl = url;
+  g('preview-title').textContent = '📄 '+name;
+  var m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  g('preview-frame').src = m ? 'https://drive.google.com/file/d/'+m[1]+'/preview'
+                              : url.replace('/view','/preview');
+  g('preview-overlay').classList.add('active');
+}
+function closePreview() { g('preview-overlay').classList.remove('active'); g('preview-frame').src=''; }
+function downloadFile() {
+  if (!S.previewUrl) return;
+  var m = S.previewUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  window.open(m ? 'https://drive.google.com/uc?export=download&id='+m[1] : S.previewUrl,'_blank');
+}
+ 
+/* ════════════════════════════════════════
+   API  — SINGLE ARGUMENT WRAPPER
+════════════════════════════════════════ */
+function callAsync(action, payload) {
+  var req = Object.assign({ action: action }, payload || {});
+  if (S.year && !req.year) req.year = S.year;
+  req.u = S.u; req.p = S.p;
+  // ใช้ text/plain เพื่อไม่ให้เบราว์เซอร์ส่ง preflight (Apps Script ไม่รองรับ OPTIONS)
+  return fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(req)
+  }).then(function(res) { return res.text(); })
+    .then(function(t) {
+      var r;
+      try { r = JSON.parse(t); }
+      catch (e) { throw new Error('เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง — ตรวจ API_URL และการตั้งค่า Deploy (Who has access = Anyone)'); }
+      if (r && r.success === false) {
+        var er = new Error(r.auth === false ? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' : (r.error || 'Server error'));
+        if (r.auth === false) er.code = 'AUTH';
+        throw er;
+      }
+      return r;
+    });
+}
+ 
+function call(action, payload) {
+  loader(true);
+  return callAsync(action, payload).finally(function(){ loader(false); });
+}
+ 
+/* ════════════════════════════════════════
+   UTILS
+════════════════════════════════════════ */
+function loader(on, msg) {
+  g('loader').classList.toggle('on', on);
+  if (msg) g('loader-msg').textContent = msg;
+}
+ 
+function toast(msg, type) {
+  var t = document.createElement('div');
+  t.className = 'toast'+(type?' '+type:'');
+  t.textContent = msg;
+  g('toasts').appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(function(){ t.remove(); },400); }, 3500);
+}
+ 
+function parseFiles(raw) {
+  if (!raw||raw==='-') return [];
+  try { var p=JSON.parse(raw); return Array.isArray(p)?p:[p]; } catch(e){ return []; }
+}
+ 
+/* เรื่อง ถูกเก็บเป็น JSON array เช่น '["เรื่องที่1","เรื่องที่2"]'
+   รองรับข้อมูลเก่าที่ยังเป็นข้อความธรรมดา (ก่อนอัปเกรดเป็นหลายเรื่อง) */
+function parseSubjects(raw) {
+  if (!raw || raw==='-') return [];
+  try {
+    var p = JSON.parse(raw);
+    if (Array.isArray(p)) return p.filter(function(s){ return String(s||'').trim(); });
+    return String(p).trim() ? [String(p)] : [];
+  } catch(e) {
+    return String(raw).trim() ? [String(raw)] : [];
+  }
+}
+ 
+function fmtD(s) {
+  if (!s||s==='-') return '—';
+  var d=new Date(s); if(isNaN(d)) return s;
+  return d.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'});
+}
+ 
+function toInput(s) {
+  if (!s) return ''; var d=new Date(s); if(isNaN(d)) return '';
+  return d.toISOString().slice(0,10);
+}
+ 
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+ 
+function sName(n,max) { max=max||24; return n.length>max?n.slice(0,max-1)+'…':n; }
+ 
+function fileIcon(n) {
+  var ext=(n||'').split('.').pop().toLowerCase();
+  var m={pdf:'📕',doc:'📘',docx:'📘',xls:'📗',xlsx:'📗',ppt:'📙',pptx:'📙',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️',zip:'🗜️',rar:'🗜️',mp4:'🎬',mp3:'🎵'};
+  return m[ext]||'📄';
+}
+ 
+function g(id)     { return document.getElementById(id); }
+function val(id)   { return (g(id)||{}).value||''; }
+function setv(id,v){ var e=g(id); if(e) e.value=v||''; }
+/* OCR-PARSER-START */
+var TH_MONTH_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+var TH_MONTH_ABBR = ['มค','กพ','มีค','เมย','พค','มิย','กค','สค','กย','ตค','พย','ธค'];
+ 
+function thMonthIndex(tok) {
+  var t = String(tok||'').replace(/[\.\s]/g,'');
+  var i = TH_MONTH_FULL.indexOf(t);
+  if (i >= 0) return i;
+  return TH_MONTH_ABBR.indexOf(t);
+}
+ 
+function findThaiDates(line) {
+  var re = /([0-9]{1,2})\s*([ก-๙][ก-๙\.\s]{1,12}?)\s*(?:พ\.?\s*ศ\.?\s*)?([0-9]{2,4})(?![0-9])/g;
+  var out = [], m;
+  while ((m = re.exec(line)) !== null) {
+    if (m.index > 0 && /[0-9]/.test(line.charAt(m.index - 1))) { re.lastIndex = m.index + 1; continue; }
+    var mi = thMonthIndex(m[2]);
+    var d = parseInt(m[1], 10), y = parseInt(m[3], 10);
+    if (mi < 0 || d < 1 || d > 31 || m[3].length === 3) { re.lastIndex = m.index + 1; continue; }
+    if (m[3].length === 2) y = 2500 + y;
+    if (y > 2400) y -= 543;
+    if (y < 1900 || y > 2200) { re.lastIndex = m.index + 1; continue; }
+    var iso = y + '-' + ('0'+(mi+1)).slice(-2) + '-' + ('0'+d).slice(-2);
+    out.push({ iso: iso, index: m.index, before: line.slice(0, m.index) });
+  }
+  return out;
+}
+ 
+function parseDocNo(rest) {
+  var m = rest.match(/^([ก-ฮ]{2,6})\s*([0-9]{2,6}(?:\.[0-9]{1,3}){0,2})\s*(\([ก-ฮ\.]{1,6}\))?\s*\/\s*((?:[ก-ฮ]{1,3}\.?\s*)?[0-9]{1,6}(?:\/[0-9]{1,6})?)/);
+  if (m) return { no: (m[1] + ' ' + m[2] + (m[3]||'') + '/' + m[4]).replace(/\s+/g,' ').trim(), rest: rest.slice(m[0].length).trim() };
+  var cut = rest.split(/\s{2,}|\s+วันที่|\s+ส่วนราชการ/)[0].trim();
+  if (cut && /[0-9]/.test(cut) && cut.length <= 40) {
+    return { no: cut.replace(/\s*\/\s*/g,'/').replace(/\s+/g,' '), rest: rest.slice(cut.length).trim() };
+  }
+  return null;
+}
+ 
+var AGENCY_RE = /^(สำนักงาน|สำนัก|ศูนย์|กรม|กอง|กลุ่ม|กระทรวง|จังหวัด|ที่ว่าการอำเภอ|อำเภอ|โรงเรียน|วิทยาลัย|มหาวิทยาลัย|เทศบาล|องค์การบริหารส่วน|อบต|อบจ|โรงพยาบาล|สถานี|ธนาคาร|บริษัท|ห้างหุ้นส่วน|ศาล|สภา|มูลนิธิ|สมาคม|สหกรณ์|การไฟฟ้า|การประปา|ที่ทำการ|คณะ|สถาบัน|สกร)/;
+var SELF_RE = /ส่งเสริมการเรียนรู้ระดับอำเภอฝาง/;
+ 
+var AGENCY_ANY_RE = /(?:^|\s)((?:สำนักงาน|ศูนย์|กรม|กอง|กระทรวง|โรงเรียน|วิทยาลัย|มหาวิทยาลัย|เทศบาล|องค์การบริหารส่วน|ที่ว่าการอำเภอ)[ก-๙\s\.\-]+)/;
+function agencyAnywhere(line) {
+  var m = String(line||'').match(AGENCY_ANY_RE);
+  return m ? cleanAgency(m[1]) : '';
+}
+ 
+function cleanAgency(s) {
+  s = String(s||'').split(/\s+(?:วันที่|โทร|Tel|ถนน|ตำบล|ซอย|หมู่|เลขที่|ตู้\s*ปณ)/i)[0].replace(/[\s\-–,\.]+$/,'').replace(/\s+/g,' ').trim();
+  if (!s || s.length > 90 || SELF_RE.test(s) || !AGENCY_RE.test(s)) return '';
+  return s;
+}
+ 
+function parseLetterText(raw) {
+  var out = {};
+  if (!raw) return out;
+  var text = String(raw).replace(/\uFEFF/g,'').replace(/[\u00a0\u200b]/g,' ').replace(/\u0E4D\u0E32/g,'\u0E33').replace(/\u0E40\u0E40/g,'\u0E41')
+    .replace(/[๐-๙]/g, function(d){ return '๐๑๒๓๔๕๖๗๘๙'.indexOf(d); });
+  var lines = text.split(/\r?\n/).map(function(l){ return l.replace(/\s+/g,' ').trim(); });
+ 
+  var subjIdx = -1;
+  for (var i = 0; i < lines.length; i++) { if (/^เรื่อง/.test(lines[i])) { subjIdx = i; break; } }
+  var hdrEnd = subjIdx >= 0 ? subjIdx : Math.min(lines.length, 12);
+  var header = lines.slice(0, hdrEnd);
+ 
+  /* เลขที่หนังสือ + ส่วนที่เหลือบนบรรทัดเดียวกัน (อาจเป็นชื่อหน่วยงาน) */
+  var agencyCands = [];
+  var gotNo = false;
+  for (var a = 0; a < Math.min(lines.length, 25); a++) {
+    var ln = lines[a];
+    var mm = ln.match(/^ที่\s+(.+)$/);
+    if (!mm) continue;
+    var dn = parseDocNo(mm[1]);
+    if (dn && !gotNo) { out['เลขที่หนังสือ'] = 'ที่ ' + dn.no; gotNo = true; if (a < hdrEnd) agencyCands.push(dn.rest); }
+    if (gotNo) break;
+  }
+  if (!gotNo) {
+    for (var b = 0; b < Math.min(lines.length, 25); b++) {
+      var m2 = lines[b].match(/^([ก-ฮ]{2,6}\s*[0-9]{2,6}(?:\.[0-9]{1,3}){0,2}\s*(?:\([ก-ฮ\.]{1,6}\))?\s*\/\s*\S+)/);
+      if (m2) { out['เลขที่หนังสือ'] = 'ที่ ' + m2[1].replace(/\s*\/\s*/g,'/').replace(/\s+/g,' '); break; }
+    }
+  }
+ 
+  /* ลงวันที่ */
+  var dated = null, anyLabel = null;
+  for (var h = 0; h < header.length && !dated; h++) {
+    var ds = findThaiDates(header[h]);
+    for (var k = 0; k < ds.length; k++) {
+      if (/(^|[^ก-๙])วันที่\s*$/.test(ds[k].before)) { dated = ds[k].iso; break; }
+    }
+  }
+  if (!dated) {
+    for (var h2 = 0; h2 < header.length && !dated; h2++) {
+      var ds2 = findThaiDates(header[h2]);
+      if (ds2.length) dated = ds2[0].iso;
+    }
+  }
+  if (!dated) {
+    for (var h3 = 0; h3 < lines.length && !dated; h3++) {
+      var ds3 = findThaiDates(lines[h3]);
+      for (var k3 = 0; k3 < ds3.length; k3++) {
+        if (/(^|[^ก-๙])วันที่\s*$/.test(ds3[k3].before)) { dated = ds3[k3].iso; break; }
+      }
+    }
+  }
+  if (dated) out['ลงวันที่'] = dated;
+  var uncertain = [], refMax = '';
+  for (var q = 0; q < lines.length; q++) {
+    var rds = findThaiDates(lines[q]);
+    for (var qi = 0; qi < rds.length; qi++) {
+      if (/ลงวันที่\s*$/.test(rds[qi].before) && rds[qi].iso > refMax) refMax = rds[qi].iso;
+    }
+  }
+  var todayISO = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  if (dated && ((refMax && dated < refMax) || dated > todayISO)) uncertain.push('ลงวันที่');
+  out._unc = uncertain;
+ 
+  /* เรื่อง */
+  if (subjIdx >= 0) {
+    var subj = lines[subjIdx].replace(/^เรื่อง\s*[:：]?\s*/, '');
+    for (var j = subjIdx + 1; j < Math.min(lines.length, subjIdx + 5); j++) {
+      var nx = lines[j];
+      if (!nx || /^(เรียน|กราบเรียน|อ้างถึง|สิ่งที่ส่งมาด้วย|ตามที่|ด้วย\s)/.test(nx)) break;
+      var glue = (/[ก-๙]$/.test(subj) && /^[ก-๙]/.test(nx)) ? '' : ' ';
+      subj += glue + nx;
+    }
+    subj = subj.split(/\s+(?=เรียน\s)/)[0].replace(/\s+/g,' ').trim();
+    if (subj.length > 250) subj = subj.slice(0, 250);
+    if (subj) out['เรื่อง'] = subj;
+  }
+ 
+  /* จากหน่วยงาน */
+  var agency = '';
+  for (var s = 0; s < header.length && !agency; s++) {
+    var sm = header[s].match(/^ส่วนราชการ\s*(.+)$/);
+    if (sm) { var c1 = cleanAgency(sm[1]); if (c1) agency = c1; }
+  }
+  if (!agency) {
+    for (var t = 0; t < header.length && !agency; t++) {
+      var cand = /^ที่\s/.test(header[t]) ? '' : header[t];
+      var c2 = cleanAgency(cand);
+      if (c2) agency = c2;
+    }
+  }
+  if (!agency) {
+    for (var t2 = 0; t2 < header.length && !agency; t2++) {
+      var c4 = agencyAnywhere(header[t2]);
+      if (c4) agency = c4;
+    }
+  }
+  if (!agency) {
+    for (var u = 0; u < agencyCands.length && !agency; u++) {
+      var c3 = cleanAgency(agencyCands[u]);
+      if (c3) agency = c3;
+    }
+  }
+  if (agency) out['จากหน่วยงาน'] = agency;
+  return out;
+}
+/* OCR-PARSER-END */
+ 
+ 
+/* ════════════════════════════════════════
+   1 เลขรับ มีได้หลายหนังสือ (แต่ละฉบับมี เลขที่ / ลงวันที่ / จากหน่วยงาน / เรื่อง ของตัวเอง)
+   - คอลัมน์ เลขที่หนังสือ / ลงวันที่ / จากหน่วยงาน ใน Sheet เก็บ "ฉบับที่ 1"
+   - คอลัมน์ เรื่อง เก็บเป็นข้อความธรรมดาถ้ามีฉบับเดียว, ถ้ามีหลายฉบับเก็บเป็น JSON ของทุกฉบับ
+════════════════════════════════════════ */
+function recItems(r) {
+  var base = { 'เลขที่หนังสือ': r['เลขที่หนังสือ']||'', 'ลงวันที่': r['ลงวันที่']||'', 'จากหน่วยงาน': r['จากหน่วยงาน']||'', 'หมายเหตุ': r['หมายเหตุ']||'' };
+  var raw = r['เรื่อง'], arr = null;
+  if (raw && raw !== '-') { try { var p = JSON.parse(raw); if (Array.isArray(p)) arr = p; } catch(e) {} }
+  function mk(subject, src, idx) {
+    src = src || {};
+    function pick(k){ return src[k] != null ? String(src[k]) : base[k]; }
+    return { 'เลขที่หนังสือ': pick('เลขที่หนังสือ'), 'ลงวันที่': pick('ลงวันที่'), 'จากหน่วยงาน': pick('จากหน่วยงาน'),
+             'เรื่อง': String(subject == null ? '' : subject),
+             // ข้อมูลเก่าที่ยังไม่มีหมายเหตุต่อฉบับ: ให้หมายเหตุเดิมอยู่ที่ฉบับแรกฉบับเดียว
+             'หมายเหตุ': src['หมายเหตุ'] != null ? String(src['หมายเหตุ']) : (idx === 0 ? base['หมายเหตุ'] : '') };
+  }
+  if (!arr) return [mk((raw && raw !== '-') ? raw : '', null, 0)];
+  var out = arr.map(function(x, i){ return (x && typeof x === 'object') ? mk(x['เรื่อง'], x, i) : mk(x, null, i); })
+    .filter(function(it){ return it['เรื่อง'].trim() || it['เลขที่หนังสือ'].trim(); });
+  return out.length ? out : [mk('', null, 0)];
+}
+ 
+var ITEM_SUFFIX = { 'เลขที่หนังสือ':'no', 'ลงวันที่':'date', 'จากหน่วยงาน':'from', 'เรื่อง':'subj', 'หมายเหตุ':'note' };
+ 
+/* ช่องกรอกของหนังสือฉบับที่ idx (0 = ฉบับแรกที่อยู่ด้านบน, 1+ = การ์ดฉบับเพิ่มเติม) */
+function itemEl(idx, key) {
+  return idx === 0 ? g('f-' + key) : g('it-' + (idx-1) + '-' + ITEM_SUFFIX[key]);
+}
+function itemSuggestEl(idx) { return idx === 0 ? g('ag-suggest') : g('it-' + (idx-1) + '-sg'); }
+ 
+function itemCardHTML(it, i) {
+  var id = 'it-' + i + '-';
+  return '<div class="item-card">'
+    + '<div class="item-head"><b>📄 หนังสือฉบับที่ '+(i+2)+'</b><span style="flex:1"></span>'
+    + '<button type="button" class="btn btn-cam btn-sm" onclick="ocrForItem('+(i+1)+',true)">📷 ถ่าย</button>'
+    + '<button type="button" class="btn btn-sec btn-sm" onclick="ocrForItem('+(i+1)+')">🪄 ไฟล์</button>'
+    + '<button type="button" class="file-row-del" title="ลบฉบับนี้" onclick="removeItem('+i+')">✕</button></div>'
+    + '<div class="fgrid">'
+    + '<div class="fg"><label>เลขที่หนังสือ <span class="req">*</span></label><input id="'+id+'no" type="text" value="'+esc(it['เลขที่หนังสือ'])+'"><div id="'+id+'nc" class="pf-chips"></div></div>'
+    + '<div class="fg"><label>ลงวันที่ <span class="req">*</span></label><input id="'+id+'date" type="date" value="'+esc(toInput(it['ลงวันที่']))+'"></div>'
+    + '<div class="fg full"><label>จากหน่วยงาน <span class="req">*</span><button type="button" class="mic-btn" data-mic="'+id+'from" title="พูดแทนการพิมพ์">🎤</button></label><input id="'+id+'from" type="text" list="dl-จากหน่วยงาน" value="'+esc(it['จากหน่วยงาน'])+'"><div id="'+id+'sg" class="ag-suggest"></div></div>'
+    + '<div class="fg full"><label>เรื่อง <span class="req">*</span><button type="button" class="mic-btn" data-mic="'+id+'subj" title="พูดแทนการพิมพ์">🎤</button></label><textarea id="'+id+'subj" rows="2">'+esc(it['เรื่อง'])+'</textarea></div>'
+    + '<div class="fg full"><label>หมายเหตุ<button type="button" class="mic-btn" data-mic="'+id+'note" title="พูดแทนการพิมพ์">🎤</button></label><input id="'+id+'note" type="text" value="'+esc(it['หมายเหตุ']||'')+'"></div>'
+    + '</div></div>';
+}
+ 
+function renderExtras() {
+  var box = g('items-extra');
+  box.innerHTML = (S.extra.length ? '<div class="ocr-sub" style="margin:0 0 10px">⬆️ ช่องด้านบน (เลขที่หนังสือ / ลงวันที่ / จากหน่วยงาน / เรื่อง) คือ <b>หนังสือฉบับที่ 1</b></div>' : '')
+    + S.extra.map(itemCardHTML).join('');
+  S.extra.forEach(function(it, i){
+    var no = g('it-'+i+'-no'), ag = g('it-'+i+'-from');
+    if (!no || !ag) return;
+    var list = dirFor(ag.value);
+    renderPrefixChips(g('it-'+i+'-nc'), list);
+    var v = no.value.trim();
+    if (v) list.forEach(function(r){ if (r.prefix.trim() === v) no.dataset.autoPrefix = r.prefix; });
+  });
+  if (!document.querySelector('.ocr-uncertain')) { var wb = g('ocr-warn'); if (wb) { wb.style.display = 'none'; wb.innerHTML = ''; } }
+}
+ 
+function collectExtras() {
+  S.extra = S.extra.map(function(it, i) {
+    var no = g('it-'+i+'-no'); if (!no) return it;
+    return { 'เลขที่หนังสือ': no.value.trim(), 'ลงวันที่': g('it-'+i+'-date').value,
+             'จากหน่วยงาน': g('it-'+i+'-from').value.trim(), 'เรื่อง': g('it-'+i+'-subj').value.trim(),
+             'หมายเหตุ': g('it-'+i+'-note').value.trim() };
+  });
+}
+ 
+function addItem() {
+  collectExtras();
+  var ag0 = val('f-จากหน่วยงาน').trim(), pf = dirFor(ag0);
+  S.extra.push({ 'เลขที่หนังสือ': pf.length ? pf[0].prefix : '', 'ลงวันที่':'', 'จากหน่วยงาน': ag0, 'เรื่อง':'', 'หมายเหตุ':'' });
+  renderExtras();
+  var e = g('it-' + (S.extra.length-1) + '-no'); if (e) { e.focus(); if (e.scrollIntoView) e.scrollIntoView({ block: 'center' }); }
+}
+ 
+function removeItem(i) { collectExtras(); S.extra.splice(i, 1); renderExtras(); }
+ 
+function ocrForItem(idx, cam) {
+  if (cam) { openCamera(idx, 'ocr'); return; }
+  S.ocrTarget = idx; g('ocr-inp').click();
+}
+
+/* ปุ่มลอยบนมือถือ: เปิดฟอร์มเพิ่มหนังสือ แล้วเปิดกล้องสดทันที */
+function quickCapture() {
+  openAddModal();
+  openCamera(0, 'ocr');
+}
+
+/* ════════════════════════════════════════
+   กล้องสด (getUserMedia) — ต้องเปิดผ่าน https (เช่น GitHub Pages)
+   mode 'ocr'    = ถ่ายแล้วอ่านข้อความกรอกฟอร์ม + แนบรูป
+   mode 'attach' = ถ่ายแล้วแนบเป็นไฟล์เฉยๆ
+════════════════════════════════════════ */
+var CAM = { stream: null, idx: 0, mode: 'ocr', facing: 'environment' };
+
+function camFallback(msg) {
+  if (msg) toast(msg, 'warn');
+  if (CAM.mode === 'attach') { var a = g('cam-add'); if (a) a.click(); }
+  else { S.ocrTarget = CAM.idx; var c = g('cam-inp'); if (c) c.click(); }
+}
+
+async function startStream() {
+  if (CAM.stream) { CAM.stream.getTracks().forEach(function(t){ t.stop(); }); CAM.stream = null; }
+  CAM.stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: CAM.facing }, width: { ideal: 2560 }, height: { ideal: 1440 } }, audio: false
+  });
+  var v = g('cam-video'); v.srcObject = CAM.stream;
+  try { await v.play(); } catch (e) {}
+}
+
+async function openCamera(idx, mode) {
+  CAM.idx = idx || 0; CAM.mode = mode || 'ocr'; CAM.facing = 'environment';
+  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) || !window.isSecureContext) {
+    camFallback('เบราว์เซอร์นี้เปิดกล้องสดไม่ได้ — ใช้กล้องของเครื่องแทน');
+    return;
+  }
+  try {
+    await startStream();
+    g('cam-overlay').classList.add('active');
+  } catch (e) {
+    closeCamera();
+    var denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
+    toast(denied ? 'ยังไม่ได้อนุญาตกล้อง — กดอนุญาตที่แถบด้านบน/ตั้งค่าเบราว์เซอร์ หรือกดปุ่ม "ใช้กล้องของเครื่อง"' : 'เปิดกล้องไม่ได้ — ลองกด "ใช้กล้องของเครื่อง"', 'err');
+  }
+}
+
+async function flipCamera() {
+  CAM.facing = CAM.facing === 'environment' ? 'user' : 'environment';
+  try { await startStream(); } catch (e) { toast('สลับกล้องไม่ได้', 'warn'); }
+}
+
+function closeCamera() {
+  if (CAM.stream) { CAM.stream.getTracks().forEach(function(t){ t.stop(); }); CAM.stream = null; }
+  var v = g('cam-video'); if (v) v.srcObject = null;
+  g('cam-overlay').classList.remove('active');
+}
+
+function snapCamera() {
+  var v = g('cam-video');
+  if (!v || !v.videoWidth) { toast('กล้องยังไม่พร้อม รอสักครู่','warn'); return; }
+  var s = Math.min(1, 2400 / Math.max(v.videoWidth, v.videoHeight));
+  var c = document.createElement('canvas');
+  c.width = Math.round(v.videoWidth * s); c.height = Math.round(v.videoHeight * s);
+  c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+  var idx = CAM.idx, mode = CAM.mode;
+  closeCamera();
+  c.toBlob(function(b) {
+    if (!b) { toast('ถ่ายรูปไม่สำเร็จ','err'); return; }
+    var f = new File([b], 'camera.jpg', { type: 'image/jpeg' });
+    if (mode === 'attach') addPhoto(f); else runOcr(f, idx, true);
+  }, 'image/jpeg', 0.92);
+}
+
+/* ════════════════════════════════════════
+   ถ่ายรูปเพิ่มเป็นไฟล์แนบ (ไม่อ่าน OCR)
+════════════════════════════════════════ */
+async function addPhoto(file) {
+  if (!file) return;
+  try {
+    var c = await compressImage(file);
+    var d = new Date(), p = function(n){ return ('0'+n).slice(-2); };
+    var name = 'ภาพถ่ายหนังสือ_' + d.getFullYear() + p(d.getMonth()+1) + p(d.getDate()) + '_' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + '.jpg';
+    S.files.push({ name: name, mimeType: c.mimeType, base64: c.base64 });
+    renderFileList();
+    toast('แนบรูปแล้ว','ok');
+  } catch (e) { toast('แนบรูปไม่สำเร็จ: ' + e.message, 'err'); }
+}
+
+/* ════════════════════════════════════════
+   พูดแทนการพิมพ์ (Web Speech API — ภาษาไทย)
+   - แตะ 🎤 เพื่อเริ่ม แตะอีกครั้ง (หรือเงียบสักครู่) เพื่อหยุด
+════════════════════════════════════════ */
+var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+var VOICE = { rec: null, btn: null, el: null, base: '' };
+
+function micLive(msg) {
+  var e = g('mic-live'); if (!e) return;
+  e.textContent = msg || ''; e.classList.toggle('on', !!msg);
+}
+
+function micStop() {
+  if (VOICE.rec) { try { VOICE.rec.stop(); } catch (e) {} }
+}
+
+function micReset() {
+  if (VOICE.btn) VOICE.btn.classList.remove('rec');
+  VOICE.rec = null; VOICE.btn = null; VOICE.el = null;
+  micLive('');
+}
+
+function micFire(el) {
+  ['input', 'change'].forEach(function(t){ el.dispatchEvent(new Event(t, { bubbles: true })); });
+}
+
+function micStart(btn) {
+  var id = btn.getAttribute('data-mic'), el = g(id === 'search' ? 'search' : id);
+  if (!el) return;
+  var same = VOICE.btn === btn;
+  micStop();
+  if (same) return;                       // แตะซ้ำที่ปุ่มเดิม = หยุด
+  if (!SpeechRec) { toast('เบราว์เซอร์นี้ไม่รองรับการพูด — ใช้ปุ่มไมค์บนคีย์บอร์ดมือถือแทน (Chrome/Safari รุ่นใหม่)','warn'); return; }
+  var rec = new SpeechRec();
+  rec.lang = 'th-TH'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+  VOICE.rec = rec; VOICE.btn = btn; VOICE.el = el;
+  var cur = String(el.value || '').trim();
+  VOICE.base = cur ? cur + ' ' : '';
+  var heard = '';
+  rec.onstart = function(){ btn.classList.add('rec'); micLive('🎤 กำลังฟัง... พูดได้เลย'); };
+  rec.onresult = function(ev) {
+    var t = '';
+    for (var i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript;
+    heard = t.replace(/\s+/g, ' ').trim();
+    el.value = VOICE.base + heard;
+    if (id !== 'search') el.dispatchEvent(new Event('input', { bubbles: true }));
+    else applyFilters();
+  };
+  rec.onerror = function(ev) {
+    var er = ev && ev.error;
+    if (er === 'not-allowed' || er === 'service-not-allowed') toast('ยังไม่ได้อนุญาตไมค์ — กดอนุญาตที่แถบด้านบน/ตั้งค่าเบราว์เซอร์ (ถ้าเปิดจากแอป LINE/Facebook ให้เปิดใน Chrome) หรือใช้ปุ่มไมค์บนคีย์บอร์ดแทน','err');
+    else if (er === 'no-speech') toast('ไม่ได้ยินเสียง ลองใหม่อีกครั้ง','warn');
+    else if (er === 'network') toast('ต้องต่อเน็ตเพื่อใช้การพูด','warn');
+    else if (er && er !== 'aborted') toast('ไมค์ผิดพลาด: ' + er, 'err');
+  };
+  rec.onend = function() {
+    if (heard && id === 'f-จากหน่วยงาน') { el.value = snapAgencyName(el.value.trim()); }
+    if (heard && id !== 'search') micFire(el);
+    micReset();
+  };
+  try { rec.start(); } catch (e) { micReset(); toast('เริ่มไมค์ไม่ได้: ' + e.message, 'err'); }
+}
+
+document.addEventListener('click', function(ev) {
+  var b = ev.target.closest ? ev.target.closest('.mic-btn') : null;
+  if (!b) return;
+  ev.preventDefault();
+  micStart(b);
+});
+if (!SpeechRec) { document.querySelectorAll('.mic-btn').forEach(function(b){ b.classList.add('nosupport'); }); }
+new MutationObserver(function() {
+  if (!SpeechRec) document.querySelectorAll('.mic-btn:not(.nosupport)').forEach(function(b){ b.classList.add('nosupport'); });
+}).observe(document.body, { childList: true, subtree: true });
+ 
+ 
+/* ════════════════════════════════════════
+   ทะเบียนหน่วยงาน → เติมรูปแบบเลขที่หนังสือให้อัตโนมัติ
+   เลือกหน่วยงาน => ระบบเติม "ที่ ศธ 07043(กอ)/" ให้ เหลือกรอกเฉพาะเลขหลัง /
+════════════════════════════════════════ */
+async function loadAgencyDir() {
+  try {
+    var r = await callAsync('getAgencyDirectory', {});
+    if (r && r.success && r.rows) {
+      S.agencyDir = r.rows.map(function(a){ return { agency: String(a[0]), prefix: String(a[1]), count: +a[2] || 0, last: String(a[3] || '') }; });
+    }
+  } catch (e) {}
+}
+ 
+function splitDocNo(no) {
+  var s = String(no || '').replace(/\s+/g, ' ').trim();
+  var m = s.match(/^(.*\/\s*[^\d]*?)(\d+)$/);
+  if (m) return { prefix: m[1], suffix: m[2] };
+  // ส่วนท้ายเป็นตัวอักษร เช่น .../พิเศษ
+  m = s.match(/^(.*\/)\s*([^\/\d][^\/]*)$/);
+  return m ? { prefix: m[1], suffix: m[2].trim() } : null;
+}
+ 
+/* ส่วนที่พิมพ์ต่อท้ายรูปแบบที่ระบบเติมไว้ (เลขหรือตัวอักษรก็ได้) — ไม่ขึ้นต้นด้วยรูปแบบนั้นจะได้ null */
+function suffixAfter(cur, prefix) {
+  var p = String(prefix || '').replace(/\s+$/, '');
+  if (p && String(cur).indexOf(p) === 0) return String(cur).slice(p.length).trim();
+  return null;
+}
+ 
+function docNoIncomplete(v, auto) {
+  var s = String(v || '').replace(/\s+/g, ' ').trim();
+  if (!s) return false;
+  if (/\/$/.test(s)) return true;                                         // จบที่ / ยังไม่ได้กรอกอะไรต่อ
+  if (auto && s === String(auto).replace(/\s+/g, ' ').trim()) return true; // ยังเป็นรูปแบบที่ระบบเติมไว้เฉยๆ
+  return false;
+}
+ 
+/* รูปแบบเลขที่ที่เคยใช้ของหน่วยงานนี้ เรียงจากใช้บ่อย/ล่าสุดก่อน */
+function dirFor(agency) {
+  var n = normAg(agency);
+  if (!n) return [];
+  var by = {}, out = [];
+  S.agencyDir.forEach(function(r){
+    if (normAg(r.agency) !== n) return;
+    if (!by[r.prefix]) { by[r.prefix] = { prefix: r.prefix, count: 0, last: '' }; out.push(by[r.prefix]); }
+    by[r.prefix].count += r.count;
+    if (r.last > by[r.prefix].last) by[r.prefix].last = r.last;
+  });
+  return out.sort(function(a, b){ return b.count - a.count || (a.last < b.last ? 1 : a.last > b.last ? -1 : 0); });
+}
+ 
+function allAgencyStats() {
+  var m = agencyStats();
+  S.agencyDir.forEach(function(r){ var a = (r.agency || '').trim(); if (a && !m[a]) m[a] = r.count || 1; });
+  return m;
+}
+ 
+function itemChipsEl(idx) { return idx === 0 ? g('no-chips') : g('it-' + (idx-1) + '-nc'); }
+ 
+function renderPrefixChips(chipsEl, list) {
+  if (!chipsEl) return;
+  if (!list || list.length < 2) { chipsEl.innerHTML = ''; return; }
+  chipsEl.innerHTML = '<span>รูปแบบเลขที่ที่เคยใช้:</span>' + list.slice(0, 6).map(function(r){
+    return '<button type="button" class="pf-chip" data-p="'+esc(r.prefix)+'" title="ใช้ '+r.count+' ครั้ง">'+esc(r.prefix.trim())+'</button>';
+  }).join('');
+}
+ 
+/* เรียกเมื่อเลือก/พิมพ์หน่วยงาน — เติมรูปแบบเลขที่ถ้าช่องเลขที่ยังว่าง หรือยังเป็นรูปแบบที่ระบบเติมไว้ */
+function applyAgencyPrefix(agEl, commit) {
+  if (!agEl) return;
+  var noEl, chips;
+  if (agEl.id === 'f-จากหน่วยงาน') { noEl = g('f-เลขที่หนังสือ'); chips = g('no-chips'); }
+  else { var m = /^it-(\d+)-from$/.exec(agEl.id || ''); if (!m) return; noEl = g('it-'+m[1]+'-no'); chips = g('it-'+m[1]+'-nc'); }
+  if (!noEl) return;
+  var list = dirFor(agEl.value);
+  renderPrefixChips(chips, list);
+  var cur = noEl.value.trim(), auto = noEl.dataset.autoPrefix || '';
+  var suffix = auto ? suffixAfter(cur, auto) : null;
+  var eligible = !cur || suffix !== null;
+  if (!eligible) return;
+  suffix = suffix || '';
+  if (!list.length) {
+    if (commit && auto) { noEl.value = suffix; noEl.dataset.autoPrefix = ''; }
+    return;
+  }
+  noEl.value = list[0].prefix + suffix;
+  noEl.dataset.autoPrefix = list[0].prefix;
+}
+ 
+/* OCR อ่านเลขที่หนังสือผิดนิดหน่อยในส่วนหน้า / ให้ปรับตามรูปแบบที่หน่วยงานนี้เคยใช้ (ผิดไม่เกิน 1 ตัวอักษร) */
+function snapDocNo(agency, no) {
+  var sp = splitDocNo(no);
+  if (!sp) return no;
+  var list = dirFor(agency);
+  if (!list.length) return no;
+  var np = normAg(sp.prefix), best = null;
+  for (var i = 0; i < list.length; i++) {
+    var nk = normAg(list[i].prefix);
+    if (nk === np) return list[i].prefix + sp.suffix;
+    if (nk.length >= 10 && levenshtein(np, nk) <= 1 && !best) best = list[i].prefix;
+  }
+  return best ? best + sp.suffix : no;
+}
+ 
+/* จำรูปแบบใหม่ทันที (เซิร์ฟเวอร์บันทึกลงชีต "ทะเบียนหน่วยงาน" ให้ด้วยตอนกดบันทึก) */
+function learnLocal(items, inc) {
+  var now = new Date().toISOString();
+  items.forEach(function(it){
+    var from = (it['จากหน่วยงาน'] || '').trim(), sp = splitDocNo(it['เลขที่หนังสือ']);
+    if (!from || !sp) return;
+    var row = S.agencyDir.filter(function(r){ return r.agency === from && r.prefix === sp.prefix; })[0];
+    if (row) { if (inc) { row.count++; row.last = now; } }
+    else S.agencyDir.push({ agency: from, prefix: sp.prefix, count: 1, last: now });
+  });
+}
+ 
+g('form-overlay').addEventListener('input', function(ev){
+  var t = ev.target;
+  if (t.id === 'f-จากหน่วยงาน' || /^it-\d+-from$/.test(t.id || '')) applyAgencyPrefix(t, false);
+});
+g('form-overlay').addEventListener('change', function(ev){
+  var t = ev.target;
+  if (t.id === 'f-จากหน่วยงาน' || /^it-\d+-from$/.test(t.id || '')) applyAgencyPrefix(t, true);
+});
+g('form-overlay').addEventListener('focusin', function(ev){
+  var t = ev.target;
+  if (t.dataset && t.dataset.autoPrefix && (t.id === 'f-เลขที่หนังสือ' || /^it-\d+-no$/.test(t.id || ''))) {
+    setTimeout(function(){ try { t.setSelectionRange(t.value.length, t.value.length); } catch (e) {} }, 0);
+  }
+});
+g('form-overlay').addEventListener('click', function(ev){
+  var b = ev.target.closest ? ev.target.closest('.pf-chip') : null;
+  if (!b) return;
+  var inp = b.parentElement.previousElementSibling;
+  if (!inp) return;
+  var pre = b.getAttribute('data-p'), cur = inp.value.trim(), auto = inp.dataset.autoPrefix || '';
+  var agEl = g(inp.id === 'f-เลขที่หนังสือ' ? 'f-จากหน่วยงาน' : inp.id.replace(/-no$/, '-from'));
+  var suffix = auto ? suffixAfter(cur, auto) : null;
+  if (suffix === null) {
+    var bestLen = -1;
+    dirFor(agEl ? agEl.value : '').forEach(function(r){
+      var s2 = suffixAfter(cur, r.prefix);
+      if (s2 !== null && r.prefix.length > bestLen) { bestLen = r.prefix.length; suffix = s2; }
+    });
+  }
+  if (suffix === null) { var sp = splitDocNo(cur); suffix = sp ? sp.suffix : ''; }
+  inp.value = pre + suffix;
+  inp.dataset.autoPrefix = pre;
+  clearOcrMark(inp);
+  inp.focus();
+  try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) {}
+});
+ 
+/* ════════════════════════════════════════
+   FILTERS (เดือน / หน่วยงาน) + SEARCH
+════════════════════════════════════════ */
+function getFiltered() {
+  var q = (val('search')||'').toLowerCase().trim();
+  var ms = monthSel();
+  var a = (val('flt-agency')||'').trim();
+  return getSorted().filter(function(r) {
+    var its = recItems(r);
+    if (ms) {
+      var d = new Date(r['วันที่รับ']);
+      if (isNaN(d) || ms.indexOf(d.getMonth()) < 0) return false;
+    }
+    if (a && !its.some(function(it){ return normAg(it['จากหน่วยงาน']).indexOf(normAg(a)) >= 0; })) return false;
+    if (q) {
+      var hit = (r['เลขรับ']||'').toLowerCase().indexOf(q) >= 0;
+      if (!hit) hit = its.some(function(it){
+        return ['เลขที่หนังสือ','จากหน่วยงาน','เรื่อง','หมายเหตุ'].some(function(k){ return (it[k]||'').toLowerCase().indexOf(q) >= 0; });
+      });
+      if (!hit) return false;
+    }
+    return true;
+  });
+}
+ 
+function applyFilters() {
+  var rows = getFiltered();
+  renderTable(rows);
+  var el = g('flt-count');
+  if (el) el.textContent = 'แสดง ' + rows.length + ' จาก ' + S.records.length + ' รายการ';
+}
+ 
+function populateAgencyFilter() {
+  var dl = g('dl-flt-agency'); if (!dl) return;
+  var st = agencyStats();
+  var list = Object.keys(st).sort(function(x,y){ return x.localeCompare(y,'th'); });
+  dl.innerHTML = list.map(function(a){ return '<option value="'+esc(a)+'">'; }).join('');
+}
+ 
+function monthSel() {
+  var t = (val('flt-month')||'').trim().replace(/^เดือน\s*/,'');
+  if (!t) return null;
+  if (/^\d{1,2}$/.test(t)) { var n = parseInt(t,10); return (n>=1 && n<=12) ? [n-1] : []; }
+  var res = [];
+  TH_MONTH_FULL.forEach(function(m,i){ if (m.indexOf(t) >= 0) res.push(i); });
+  if (!res.length) { var tt = t.replace(/[\.\s]/g,''); TH_MONTH_ABBR.forEach(function(m,i){ if (m === tt) res.push(i); }); }
+  return res;
+}
+ 
+/* ════════════════════════════════════════
+   ชื่อหน่วยงาน: จับชื่อใกล้เคียง / รวมชื่อซ้ำ
+════════════════════════════════════════ */
+function normAg(s) {
+  return String(s||'').toLowerCase().replace(/[\s\.\-_,()\/]/g,'').replace(/[\u0E48-\u0E4B]/g,'');
+}
+ 
+function levenshtein(a, b) {
+  var m = a.length, n = b.length;
+  if (!m) return n; if (!n) return m;
+  var prev = [], cur = [], i, j;
+  for (j = 0; j <= n; j++) prev[j] = j;
+  for (i = 1; i <= m; i++) {
+    cur[0] = i;
+    for (j = 1; j <= n; j++) {
+      cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1] + (a.charAt(i-1) === b.charAt(j-1) ? 0 : 1));
+    }
+    var t = prev; prev = cur; cur = t;
+  }
+  return prev[n];
+}
+ 
+function typoAg(x, y) {
+  var a = normAg(x), b = normAg(y);
+  if (!a || !b) return false;
+  if (a === b) return x !== y;
+  var mn = Math.min(a.length, b.length), mx = Math.max(a.length, b.length);
+  if (mn < 4) return false;
+  return levenshtein(a, b) <= Math.max(1, Math.floor(mx * 0.06));
+}
+ 
+function containAg(x, y) {
+  var a = normAg(x), b = normAg(y);
+  if (!a || !b || a === b) return false;
+  return Math.min(a.length, b.length) >= 8 && (a.indexOf(b) >= 0 || b.indexOf(a) >= 0);
+}
+ 
+function similarAg(x, y) { return typoAg(x, y) || containAg(x, y); }
+ 
+function agencyStats() {
+  var m = {};
+  S.records.forEach(function(r){
+    recItems(r).forEach(function(it){ var a=(it['จากหน่วยงาน']||'').trim(); if (a) m[a] = (m[a]||0)+1; });
+  });
+  return m;
+}
+ 
+function snapAgencyName(name) {
+  var st = allAgencyStats(), a = normAg(name);
+  if (!a) return name;
+  var best = null;
+  Object.keys(st).forEach(function(k){
+    var b = normAg(k);
+    if (b.length < 8) return;
+    var hit = (a === b) || (a.indexOf(b) === 0) || (a.length >= 15 && levenshtein(a, b) <= 2);
+    if (!hit) return;
+    if (!best || b.length > normAg(best).length || (b.length === normAg(best).length && st[k] > st[best])) best = k;
+  });
+  return best || name;
+}
+ 
+function suggestAgencyFor(inp, box) {
+  if (!inp || !box) return;
+  var t = (inp.value||'').trim();
+  box.innerHTML = '';
+  if (t.length < 4) return;
+  var st = allAgencyStats();
+  if (Object.prototype.hasOwnProperty.call(st, t)) return;
+  var list = Object.keys(st).filter(function(n){ return similarAg(t, n); })
+    .sort(function(a,b){ return st[b]-st[a]; }).slice(0,3);
+  if (!list.length) return;
+  box.innerHTML = 'ชื่อใกล้เคียงที่เคยบันทึก: ' + list.map(function(n){
+    return '<button type="button" class="ag-chip" data-n="'+esc(n)+'">'+esc(n)+' ('+st[n]+')</button>';
+  }).join('');
+}
+ 
+function suggestAgency() { suggestAgencyFor(g('f-จากหน่วยงาน'), g('ag-suggest')); }
+ 
+g('form-overlay').addEventListener('input', function(ev){
+  var t = ev.target;
+  if (t.id === 'f-จากหน่วยงาน') suggestAgency();
+  else if (/^it-\d+-from$/.test(t.id || '')) suggestAgencyFor(t, g(t.id.replace(/from$/, 'sg')));
+});
+g('form-overlay').addEventListener('click', function(ev){
+  var b = ev.target.closest ? ev.target.closest('.ag-chip') : null;
+  if (!b) return;
+  var box = b.parentElement, inp = box.previousElementSibling;
+  if (inp) inp.value = b.getAttribute('data-n');
+  box.innerHTML = '';
+});
+ 
+var MERGE_NAMES = [], MERGE_SEL = {};
+ 
+function buildAgencyGroups() {
+  var st = agencyStats(), names = Object.keys(st), parent = names.map(function(_,i){ return i; });
+  function find(i){ while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; }
+  var i, j;
+  /* 1) พิมพ์ผิดเล็กน้อย / ต่างกันแค่เว้นวรรค → รวมกลุ่มได้เลย */
+  for (i = 0; i < names.length; i++)
+    for (j = i+1; j < names.length; j++)
+      if (typoAg(names[i], names[j])) parent[find(i)] = find(j);
+  /* 2) ชื่อที่พิมพ์ไม่ครบ (เป็นส่วนหนึ่งของชื่อยาวกว่า) → รวมเมื่อมีชื่อเต็มที่ตรงกันเพียงกลุ่มเดียว
+        ถ้าตรงกับหลายกลุ่ม (เช่น "ศูนย์…ระดับอำเภอ" ตรงกับหลายอำเภอ) ถือว่ากำกวม ไม่รวมให้ */
+  var links = [];
+  for (i = 0; i < names.length; i++) {
+    var roots = {}, last = -1;
+    for (j = 0; j < names.length; j++) {
+      if (i === j) continue;
+      if (normAg(names[j]).length > normAg(names[i]).length && containAg(names[i], names[j])) { roots[find(j)] = 1; last = j; }
+    }
+    if (Object.keys(roots).length === 1) links.push([i, last]);
+  }
+  links.forEach(function(l){ parent[find(l[0])] = find(l[1]); });
+  var by = {};
+  names.forEach(function(n,k){ var r = find(k); (by[r] = by[r] || []).push({ name: n, count: st[n] }); });
+  return Object.keys(by).map(function(k){ return by[k]; }).filter(function(gp){ return gp.length > 1; })
+    .map(function(gp){ return gp.sort(function(a,b){ return b.count - a.count || b.name.length - a.name.length; }); });
+}
+ 
+function openMergeModal() {
+  var groups = buildAgencyGroups();
+  var st = agencyStats(), used = {}, list = [];
+  groups.forEach(function(gp, gi){ gp.forEach(function(v){ used[v.name] = 1; list.push({ name: v.name, count: v.count, gid: gi }); }); });
+  Object.keys(st).filter(function(n){ return !used[n]; })
+    .sort(function(a,b){ return a.localeCompare(b,'th'); })
+    .forEach(function(n){ list.push({ name: n, count: st[n], gid: -1 }); });
+  MERGE_NAMES = list; MERGE_SEL = {};
+  setv('mg-filter',''); setv('mg-target','');
+  g('mg-target').dataset.auto = '1';
+  renderMergeList(); mgSummary();
+  g('merge-overlay').classList.add('active');
+}
+ 
+function closeMergeModal() { g('merge-overlay').classList.remove('active'); }
+ 
+function renderMergeList() {
+  var q = normAg(val('mg-filter')), box = g('merge-list'), html = '', lastG = -2;
+  var shown = MERGE_NAMES.map(function(v,i){ return { v:v, i:i }; }).filter(function(o){ return !q || normAg(o.v.name).indexOf(q) >= 0; });
+  if (!shown.length) { box.innerHTML = '<div class="subj-empty-hint" style="padding:16px 0;text-align:center">ไม่พบชื่อหน่วยงาน</div>'; return; }
+  shown.forEach(function(o){
+    if (!q && o.v.gid !== lastG) {
+      if (o.v.gid >= 0) html += '<div class="mg-ghead">🔗 ชื่อที่คล้ายกัน <a onclick="mgSelectGroup('+o.v.gid+')">เลือกทั้งกลุ่ม</a></div>';
+      else if (lastG >= 0) html += '<div class="mg-ghead" style="color:var(--g400)">ชื่ออื่นๆ ทั้งหมด</div>';
+      lastG = o.v.gid;
+    }
+    html += '<label class="mg-row'+(MERGE_SEL[o.i]?' sel':'')+(o.v.gid>=0?' grp':'')+'">'
+      +'<input type="checkbox" '+(MERGE_SEL[o.i]?'checked ':'')+'onchange="mgToggle('+o.i+', this.checked)">'
+      +'<span>'+esc(o.v.name)+'</span><span class="cnt">('+o.v.count+' รายการ)</span></label>';
+  });
+  box.innerHTML = html;
+}
+ 
+function mgToggle(i, on) {
+  if (on) MERGE_SEL[i] = true; else delete MERGE_SEL[i];
+  mgRefresh();
+}
+ 
+function mgSelectGroup(gid) {
+  MERGE_NAMES.forEach(function(v,i){ if (v.gid === gid) MERGE_SEL[i] = true; });
+  renderMergeList(); mgRefresh();
+}
+ 
+function mgSelected() {
+  return Object.keys(MERGE_SEL).map(function(k){ return MERGE_NAMES[parseInt(k,10)]; });
+}
+ 
+function mgRefresh() {
+  var sel = mgSelected(), t = g('mg-target');
+  var best = sel.slice().sort(function(a,b){ return b.count - a.count || b.name.length - a.name.length; })[0];
+  if (t.dataset.auto !== '0') { t.value = best ? best.name : ''; t.dataset.auto = '1'; }
+  g('dl-mg-target').innerHTML = sel.map(function(v){ return '<option value="'+esc(v.name)+'">'; }).join('');
+  renderMergeList();
+  mgSummary();
+}
+ 
+function mgSummary() {
+  var sel = mgSelected(), target = (val('mg-target')||'').trim(), el = g('mg-summary');
+  if (!sel.length) { el.textContent = 'ยังไม่ได้ติ๊กเลือกชื่อ'; return; }
+  var n = 0; sel.forEach(function(v){ if (v.name !== target) n += v.count; });
+  if (!target) { el.textContent = 'เลือกแล้ว '+sel.length+' ชื่อ — พิมพ์ชื่อที่ถูกต้องก่อน'; return; }
+  el.textContent = 'เลือกแล้ว '+sel.length+' ชื่อ → จะแก้ '+n+' รายการให้เป็น "'+target+'"';
+}
+ 
+async function applyMerge() {
+  var sel = mgSelected(), target = (val('mg-target')||'').trim();
+  if (!sel.length) { toast('ติ๊กเลือกชื่อที่ต้องการรวมก่อน','warn'); return; }
+  if (!target) { toast('พิมพ์หรือเลือกชื่อที่ถูกต้องก่อน','warn'); return; }
+  var map = {}, n = 0;
+  sel.forEach(function(v){ if (v.name !== target) { map[v.name] = target; n += v.count; } });
+  if (!n) { toast('ไม่มีรายการที่ต้องแก้','warn'); return; }
+  try {
+    var r = await call('mergeAgencies', { map: map });
+    closeMergeModal();
+    toast('แก้ชื่อหน่วยงานแล้ว '+(r.changed||0)+' รายการ','ok');
+    loadAgencyDir();
+    loadData();
+  } catch (e) { toast('แก้ชื่อไม่สำเร็จ: '+e.message,'err'); }
+}
+ 
+function clearFilters() {
+  setv('flt-month',''); setv('flt-agency',''); setv('search','');
+  applyFilters();
+}
+ 
+/* ════════════════════════════════════════
+   REPORT: พิมพ์ / PDF และ Excel
+════════════════════════════════════════ */
+function reportRows() {
+  function n(r){ var m=String(r['เลขรับ']||'').match(/(\d+)\s*$/); return m?parseInt(m[1],10):0; }
+  return getFiltered().slice().sort(function(a,b){ return n(a)-n(b); });
+}
+ 
+function reportInfo() {
+  var parts = [];
+  var ms = monthSel(), a = (val('flt-agency')||'').trim();
+  var mLabel = ms ? (ms.length === 1 ? TH_MONTH_FULL[ms[0]] : (val('flt-month')||'').trim()) : '';
+  if (ms) parts.push('เดือน' + mLabel);
+  if (a) parts.push('จาก ' + a);
+  return {
+    title: 'ทะเบียนหนังสือรับ ปี พ.ศ. ' + S.year,
+    subtitle: 'ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอฝาง' + (parts.length ? ' | ' + parts.join(' | ') : ' | ทั้งหมด'),
+    fname: 'ทะเบียนหนังสือรับ_' + S.year + (ms && ms.length === 1 ? '_' + mLabel : '')
+  };
+}
+ 
+/* บรรทัดรายงาน: 1 หนังสือ = 1 บรรทัด (เลขรับซ้ำได้) */
+function reportLines() {
+  var a = (val('flt-agency')||'').trim(), out = [];
+  reportRows().forEach(function(r){
+    recItems(r).forEach(function(it){
+      if (a && normAg(it['จากหน่วยงาน']).indexOf(normAg(a)) < 0) return;
+      out.push([r['เลขรับ']||'', it['เลขที่หนังสือ']||'', fmtD(it['ลงวันที่']), it['จากหน่วยงาน']||'',
+                it['เรื่อง']||'', fmtD(r['วันที่รับ']), it['หมายเหตุ']||'']);
+    });
+  });
+  return out;
+}
+ 
+function printReport() {
+  var lines = reportLines();
+  if (!lines.length) { toast('ไม่มีข้อมูลให้พิมพ์','warn'); return; }
+  var info = reportInfo();
+  var body = lines.map(function(l){
+    return '<tr>'+l.map(function(v){ return '<td>'+esc(v)+'</td>'; }).join('')+'</tr>';
+  }).join('');
+  g('print-root').innerHTML = '<div class="rpt"><h2>'+esc(info.title)+'</h2><div class="rpt-sub">'+esc(info.subtitle)+'</div>'
+    +'<table><thead><tr><th>เลขรับ</th><th>เลขที่หนังสือ</th><th>ลงวันที่</th><th>จากหน่วยงาน</th><th>เรื่อง</th><th>วันที่รับ</th><th>หมายเหตุ</th></tr></thead><tbody>'+body+'</tbody></table>'
+    +'<div class="rpt-foot">รวม '+lines.length+' ฉบับ | พิมพ์เมื่อ '+esc(new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}))+'</div></div>';
+  var done = function(){ document.body.classList.remove('printing'); g('print-root').innerHTML=''; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  document.body.classList.add('printing');
+  setTimeout(function(){
+    try { window.print(); } catch(e) { done(); toast('เปิดหน้าพิมพ์ไม่ได้ ลองใช้ปุ่ม ส่งออก Excel แทน','err'); }
+  }, 80);
+}
+ 
+/* ── สร้างไฟล์ .xlsx ในเบราว์เซอร์ (ไม่ใช้ server/สิทธิ์เพิ่ม) ── */
+var _crcT = null;
+function crc32(u8) {
+  if (!_crcT) { _crcT = []; for (var n=0;n<256;n++){ var c=n; for (var k=0;k<8;k++) c = (c&1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1); _crcT[n]=c>>>0; } }
+  var crc = 0xFFFFFFFF;
+  for (var i=0;i<u8.length;i++) crc = _crcT[(crc ^ u8[i]) & 0xFF] ^ (crc>>>8);
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+ 
+function zipStore(files) {
+  var enc = new TextEncoder(), parts = [], central = [], offset = 0;
+  function u16(v){ return [v&255,(v>>8)&255]; }
+  function u32(v){ return [v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255]; }
+  files.forEach(function(f){
+    var name = enc.encode(f.name), data = enc.encode(f.data), crc = crc32(data);
+    var local = [].concat(u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0));
+    parts.push(new Uint8Array(local), name, data);
+    central.push({ name:name, crc:crc, size:data.length, offset:offset });
+    offset += local.length + name.length + data.length;
+  });
+  var cdStart = offset, cdSize = 0;
+  central.forEach(function(f){
+    var h = [].concat(u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(f.crc),u32(f.size),u32(f.size),u16(f.name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(f.offset));
+    parts.push(new Uint8Array(h), f.name);
+    cdSize += h.length + f.name.length;
+  });
+  parts.push(new Uint8Array([].concat(u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cdSize),u32(cdStart),u16(0))));
+  return new Blob(parts, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+ 
+function buildXlsx(title, subtitle, headers, rows) {
+  function x(s){ return String(s==null?'':s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function col(i){ return String.fromCharCode(65+i); }
+  function cell(ci, ri, v, s){ return '<c r="'+col(ci)+ri+'" s="'+s+'" t="inlineStr"><is><t xml:space="preserve">'+x(v)+'</t></is></c>'; }
+  var sd = '<row r="1">'+cell(0,1,title,1)+'</row><row r="2">'+cell(0,2,subtitle,0)+'</row>';
+  sd += '<row r="4" ht="24" customHeight="1">'+headers.map(function(h,i){ return cell(i,4,h,2); }).join('')+'</row>';
+  rows.forEach(function(r,ri){
+    sd += '<row r="'+(ri+5)+'">'+headers.map(function(_,i){ return cell(i,ri+5,r[i],3); }).join('')+'</row>';
+  });
+  var widths = [12,22,16,38,60,16,26];
+  var X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  var sheet = X+'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="4" topLeftCell="A5" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
+    +'<cols>'+widths.map(function(w,i){ return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'; }).join('')+'</cols>'
+    +'<sheetData>'+sd+'</sheetData></worksheet>';
+  var styles = X+'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +'<fonts count="4"><font><sz val="11"/><name val="Tahoma"/></font><font><b/><sz val="14"/><name val="Tahoma"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Tahoma"/></font><font><sz val="11"/><name val="Tahoma"/></font></fonts>'
+    +'<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF3D5A99"/><bgColor indexed="64"/></patternFill></fill></fills>'
+    +'<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FF444444"/></left><right style="thin"><color rgb="FF444444"/></right><top style="thin"><color rgb="FF444444"/></top><bottom style="thin"><color rgb="FF444444"/></bottom><diagonal/></border></borders>'
+    +'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+    +'<cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+    +'<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+    +'<xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+    +'<xf numFmtId="49" fontId="3" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs>'
+    +'<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  return zipStore([
+    { name:'[Content_Types].xml', data: X+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>' },
+    { name:'_rels/.rels', data: X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+    { name:'xl/workbook.xml', data: X+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="ทะเบียนหนังสือรับ" sheetId="1" r:id="rId1"/></sheets></workbook>' },
+    { name:'xl/_rels/workbook.xml.rels', data: X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+    { name:'xl/styles.xml', data: styles },
+    { name:'xl/worksheets/sheet1.xml', data: sheet }
+  ]);
+}
+ 
+async function exportExcel() {
+  var data = reportLines();
+  if (!data.length) { toast('ไม่มีข้อมูลให้ส่งออก','warn'); return; }
+  var info = reportInfo();
+  try {
+    var blob = buildXlsx(info.title, info.subtitle, ['เลขรับ','เลขที่หนังสือ','ลงวันที่','จากหน่วยงาน','เรื่อง','วันที่รับ','หมายเหตุ'], data);
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = info.fname + '.xlsx';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    toast('ส่งออก Excel แล้ว ('+data.length+' ฉบับ)','ok');
+  } catch(e) { toast('ส่งออกไม่สำเร็จ: '+e.message,'err'); }
+}
+ 
+/* ════════════════════════════════════════
+   OCR: อ่านไฟล์หนังสือ แล้วกรอกฟอร์มอัตโนมัติ
+════════════════════════════════════════ */
+function resetOcrUI(show) {
+  var box = g('ocr-box'); if (box) box.style.display = show ? 'block' : 'none';
+  setOcrStatus('');
+  var w = g('ocr-raw-wrap'); if (w) w.style.display = 'none';
+  document.querySelectorAll('.ocr-filled,.ocr-uncertain').forEach(function(e){ e.classList.remove('ocr-filled','ocr-uncertain'); });
+  var pw = g('ocr-prev-wrap'); if (pw) pw.style.display = 'none';
+  var wn = g('ocr-warn'); if (wn) { wn.style.display = 'none'; wn.innerHTML = ''; }
+  document.querySelectorAll('.ocr-hint').forEach(function(h){ h.remove(); });
+  S.ocrConfirmed = false;
+}
+ 
+function setOcrStatus(html) { var e = g('ocr-status'); if (e) e.innerHTML = html; }
+ 
+function clearOcrMark(el) {
+  if (!el || !el.classList || !el.classList.contains('ocr-uncertain')) return;
+  el.classList.remove('ocr-uncertain');
+  var h = el.id ? document.querySelector('.ocr-hint[data-for="'+el.id+'"]') : null;
+  if (h) h.remove();
+  if (!document.querySelector('.ocr-uncertain')) { var wb = g('ocr-warn'); if (wb) { wb.style.display = 'none'; wb.innerHTML = ''; } }
+}
+g('form-overlay').addEventListener('input', function(ev){ if (ev.target.classList) { ev.target.classList.remove('ocr-filled'); clearOcrMark(ev.target); } });
+g('form-overlay').addEventListener('focusout', function(ev){ clearOcrMark(ev.target); });
+ 
+function fileToBase64(file) {
+  return new Promise(function(res, rej){
+    var fr = new FileReader();
+    fr.onload = function(){ res(String(fr.result).split(',')[1]); };
+    fr.onerror = function(){ rej(new Error('อ่านไฟล์ไม่ได้')); };
+    fr.readAsDataURL(file);
+  });
+}
+ 
+function compressImage(file) {
+  return new Promise(function(res, rej){
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function(){
+      var s = Math.min(1, 2000/Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+      var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,c.width,c.height);
+      x.drawImage(img,0,0,c.width,c.height);
+      var q = 0.85, d;
+      do { d = c.toDataURL('image/jpeg', q); q -= 0.1; } while (d.length > 2.6*1024*1024 && q > 0.3);
+      URL.revokeObjectURL(url);
+      res({ mimeType: 'image/jpeg', base64: d.split(',')[1] });
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); rej(new Error('เปิดรูปภาพไม่ได้')); };
+    img.src = url;
+  });
+}
+ 
+async function runOcr(file, idx, fromCam) {
+  if (!file) return;
+  idx = idx || 0;
+  collectExtras();
+  if (idx > S.extra.length) idx = 0;
+  var isPdf = /pdf$/i.test(file.type) || /\.pdf$/i.test(file.name);
+  var isImg = /^image\/(jpeg|png)$/i.test(file.type) || /\.(jpe?g|png)$/i.test(file.name);
+  if (!isPdf && !isImg) { toast('รองรับเฉพาะไฟล์ PDF, JPG, PNG','warn'); return; }
+  if (file.size > 20*1024*1024) { toast('ไฟล์ใหญ่เกิน 20MB','warn'); return; }
+  var btn = g('btn-ocr'); btn.disabled = true;
+  setOcrStatus('⏳ กำลังอ่านไฟล์... (ประมาณ 5-20 วินาที)');
+  try {
+    var origB64 = await fileToBase64(file);
+    var origMime = isPdf ? 'application/pdf' : (/png$/i.test(file.name) ? 'image/png' : 'image/jpeg');
+    var send = { mimeType: origMime, base64: origB64 };
+    if (isImg) send = await compressImage(file);
+    var r = await callAsync('ocrExtract', { fileData: { name: file.name, mimeType: send.mimeType, base64: send.base64 } });
+    var viaGemini = r.mode === 'gemini';
+    var text = r.text || '';
+    var f = viaGemini ? (r.fields || {}) : parseLetterText(text);
+    var unc = viaGemini ? (r.uncertain || []) : ['เลขที่หนังสือ','ลงวันที่'];
+    if (viaGemini) text = JSON.stringify(f, null, 1);
+    g('ocr-raw').textContent = text || '(ไม่พบข้อความ)';
+    g('ocr-raw-wrap').style.display = 'block';
+    if (isImg) { g('ocr-prev').innerHTML = '<img src="data:'+send.mimeType+';base64,'+send.base64+'" alt="เอกสาร">'; g('ocr-prev-wrap').style.display = 'block'; }
+    document.querySelectorAll('.ocr-hint').forEach(function(h){ h.remove(); });
+    document.querySelectorAll('.ocr-uncertain').forEach(function(e){ e.classList.remove('ocr-uncertain'); });
+    var filled = [], missing = [];
+    var agVal = f['จากหน่วยงาน'] ? snapAgencyName(f['จากหน่วยงาน']) : '';
+    ['เลขที่หนังสือ','ลงวันที่','จากหน่วยงาน','เรื่อง'].forEach(function(k){
+      var e = itemEl(idx, k);
+      var v = f[k];
+      if (v && k === 'จากหน่วยงาน') v = agVal;
+      if (v && k === 'เลขที่หนังสือ') v = snapDocNo(agVal || (itemEl(idx, 'จากหน่วยงาน').value || ''), v);
+      if (e && v) { e.value = v; e.classList.add(unc.indexOf(k) >= 0 ? 'ocr-uncertain' : 'ocr-filled'); filled.push(k); } else missing.push(k);
+    });
+    var noEl0 = itemEl(idx, 'เลขที่หนังสือ'); if (noEl0) noEl0.dataset.autoPrefix = '';
+    suggestAgencyFor(itemEl(idx, 'จากหน่วยงาน'), itemSuggestEl(idx));
+    applyAgencyPrefix(itemEl(idx, 'จากหน่วยงาน'), false);
+    if (!val('f-วันที่รับ')) setv('f-วันที่รับ', new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
+ 
+    var dup = S.files.some(function(x){ return x.name === file.name && x.base64 === origB64; });
+    // PDF แนบเข้ารายการเสมอ / รูปที่ถ่ายจากกล้อง แนบเป็น JPG ที่ย่อแล้ว / รูปที่เลือกจากไฟล์ใช้อ่านข้อความเท่านั้น
+    if (isPdf && !dup) { S.files.push({ name: file.name, mimeType: origMime, base64: origB64 }); renderFileList(); }
+    else if (fromCam && isImg && !S.files.some(function(x){ return x.base64 === send.base64; })) {
+      var dt = new Date(), pp = function(n){ return ('0'+n).slice(-2); };
+      S.files.push({ name: 'ภาพถ่ายหนังสือ_' + dt.getFullYear() + pp(dt.getMonth()+1) + pp(dt.getDate()) + '_' + pp(dt.getHours()) + pp(dt.getMinutes()) + pp(dt.getSeconds()) + '.jpg', mimeType: send.mimeType, base64: send.base64 });
+      renderFileList();
+    }
+ 
+    var warnFields = unc.filter(function(k){ var e = itemEl(idx, k); return !!(e && e.value); });
+    S.ocrConfirmed = false;
+    if (warnFields.length && (viaGemini ? filled.length : text.trim())) {
+      var wb = g('ocr-warn');
+      wb.innerHTML = '⚠️ กรุณาตรวจสอบอีกรอบ'+(idx ? ' (หนังสือฉบับที่ '+(idx+1)+')' : '')+' — '+warnFields.join(', ')
+        +(viaGemini ? ' (ระบบไม่มั่นใจในช่องนี้)' : ' (ตัวเลขที่อ่านจาก OCR ฟรีอาจผิด)')
+        +((!viaGemini && f._unc && f._unc.length) ? '<br><span style="font-weight:400">วันที่ที่อ่านได้ดูไม่สมเหตุสมผล เช่น ลงก่อนวันที่ของหนังสืออ้างถึง</span>' : '');
+      wb.style.display = 'block';
+      warnFields.forEach(function(k){
+        var field = itemEl(idx, k);
+        if (!field) return;
+        var anchor = (k === 'จากหน่วยงาน') ? (itemSuggestEl(idx) || field) : (k === 'เลขที่หนังสือ') ? (itemChipsEl(idx) || field) : field;
+        var h = document.createElement('div'); h.className = 'ocr-hint'; h.setAttribute('data-for', field.id); h.textContent = '⚠️ กรุณาตรวจสอบอีกรอบ';
+        anchor.insertAdjacentElement('afterend', h);
+      });
+    }
+    var who = idx ? 'หนังสือฉบับที่ '+(idx+1)+': ' : '';
+    if (idx) toast('อ่านไฟล์เสร็จ — ตรวจสอบช่องที่กรอกให้ในหนังสือฉบับที่ '+(idx+1),'ok');
+    var tail = (viaGemini ? ' <span style="color:var(--g400)">(อ่านด้วย Gemini)</span>' : '')
+      + (r.note ? ' <span style="color:#b26a00">| Gemini ใช้ไม่ได้ ('+esc(r.note)+') จึงใช้ OCR ของ Drive แทน</span>' : '');
+    if (viaGemini && filled.length) setOcrStatus(who+'✅ กรอกให้แล้ว: '+filled.join(', ')+(missing.length ? ' <span style="color:#b26a00">| ไม่พบ: '+missing.join(', ')+'</span>' : '')+' — ช่องสีเหลืองคือที่ระบบกรอก โปรดตรวจสอบ'+tail);
+    else if (viaGemini) setOcrStatus('<span style="color:var(--err)">⚠️ Gemini อ่านข้อมูลจากไฟล์นี้ไม่ได้ — กรุณากรอกเอง</span>');
+    else if (!text.trim()) setOcrStatus('<span style="color:var(--err)">⚠️ อ่านข้อความจากไฟล์ไม่ได้ (ภาพอาจไม่ชัด) — กรุณากรอกเอง</span>');
+    else if ((text.match(/[ก-๙]/g)||[]).length < 15 && text.trim().length > 30) setOcrStatus('<span style="color:var(--err)">⚠️ ระบบอ่านภาษาไทยจากไฟล์นี้ไม่ออก (ภาพอาจเป็นภาพถ่าย/ไม่ชัด/ความละเอียดต่ำ) — กรุณากรอกเอง หรือลองใช้ไฟล์ PDF ที่เป็นข้อความ / สแกนความละเอียด 300 dpi</span>');
+    else if (!filled.length) setOcrStatus('<span style="color:var(--err)">⚠️ อ่านข้อความได้ แต่จับข้อมูลไม่ได้ ดูข้อความที่อ่านได้ด้านล่าง แล้วกรอกเอง</span>');
+    else setOcrStatus(who+'✅ กรอกให้แล้ว: '+filled.join(', ')+(missing.length ? ' <span style="color:#b26a00">| ไม่พบ: '+missing.join(', ')+'</span>' : '')+' — ช่องสีเหลืองคือที่ระบบกรอก โปรดตรวจสอบ'+tail);
+  } catch (e) {
+    setOcrStatus('<span style="color:var(--err)">❌ '+esc(e.message||String(e))+'</span>');
+  } finally { btn.disabled = false; }
+}
+ 
+ 
+/* โลโก้สำรองที่ฝังไว้ (ย่อแล้ว) */
+var LOGO_FALLBACK = 'data:image/png;base64,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';
+loadLogo();
+</script>
+</body>
+</html>
