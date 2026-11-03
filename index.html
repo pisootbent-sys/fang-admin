@@ -379,6 +379,15 @@ tbody td:last-child .row-act{min-width:0}
 /* ═════════ กล้องสด ═════════ */
 .cam-wrap{position:relative;width:100%;height:100vh;height:100dvh;background:#000;display:flex;align-items:center;justify-content:center}
 .cam-wrap video{width:100%;height:100%;object-fit:contain;background:#000}
+.nofile{display:inline-block;font-size:.78rem;font-weight:600;color:#a34a00;background:#fff3e6;border:1px solid #f0c9a0;border-radius:99px;padding:3px 10px;white-space:nowrap}
+.cam-guide{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:min(94%,calc((100vh - 230px) * 1.21));width:min(94%,calc((100dvh - 230px) * 1.21));aspect-ratio:1.21;border:2px solid rgba(255,255,255,.95);border-radius:8px;box-shadow:0 0 0 200vmax rgba(0,0,0,.5);pointer-events:none}
+.cam-guide .gz{position:absolute;border:2px solid #ff5a4d;border-radius:4px;background:rgba(255,90,77,.08)}
+.cam-guide .gz b{position:absolute;left:-2px;top:-1.5em;font-size:.72rem;font-weight:700;color:#fff;background:#e64a3c;padding:0 7px;border-radius:4px;white-space:nowrap}
+.gz-no{left:9%;top:15%;width:29%;height:9%}
+.gz-ag{left:59%;top:15%;width:34%;height:10%}
+.gz-dt{left:48%;top:27%;width:24%;height:8%}
+.gz-sj{left:11%;top:37%;width:82%;height:9%}
+.cam-tg{position:absolute;right:12px;top:calc(48px + env(safe-area-inset-top));padding:7px 14px;border:none;border-radius:50px;background:rgba(255,255,255,.22);color:#fff;font:600 .8rem 'Sarabun',sans-serif;cursor:pointer}
 .cam-hint{position:absolute;top:calc(14px + env(safe-area-inset-top));left:12px;right:12px;text-align:center;color:#fff;font-size:.9rem;text-shadow:0 1px 4px rgba(0,0,0,.8)}
 .cam-bar{position:absolute;left:0;right:0;bottom:0;padding:18px 16px calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;background:linear-gradient(0deg,rgba(0,0,0,.65),transparent)}
 .cam-side{min-width:104px;padding:12px 10px;border:none;border-radius:50px;background:rgba(255,255,255,.2);color:#fff;font:600 .9rem 'Sarabun',sans-serif;cursor:pointer}
@@ -525,6 +534,7 @@ tbody td:last-child .row-act{min-width:0}
       <input id="flt-agency" list="dl-flt-agency" type="text" autocomplete="off" placeholder="🏢 ทุกหน่วยงาน (พิมพ์หรือเลือก)" title="พิมพ์บางส่วนของชื่อหน่วยงานได้" oninput="applyFilters()">
       <datalist id="dl-flt-agency"></datalist>
       <button class="btn btn-sec btn-sm" onclick="clearFilters()">✖ ล้างตัวกรอง</button>
+      <button class="btn btn-sec btn-sm" id="btn-nofile" onclick="toggleNoFile()" title="แสดงเฉพาะเรื่องที่ยังไม่ได้อัพไฟล์เอกสาร">⚠️ ยังไม่อัพเอกสาร</button>
       <button class="btn btn-warn btn-sm admin-only" onclick="openMergeModal()">🧹 รวม/เปลี่ยนชื่อหน่วยงาน</button>
       <span class="flt-count" id="flt-count"></span>
       <span style="flex:1"></span>
@@ -646,7 +656,6 @@ tbody td:last-child .row-act{min-width:0}
           <p style="font-size:.78rem;margin-top:4px">รองรับทุกประเภทไฟล์ · สูงสุด 20 MB ต่อไฟล์</p>
           <input type="file" id="file-inp" multiple style="display:none" onchange="addFiles(this.files)">
         </div>
-        <button type="button" class="btn btn-cam btn-sm" style="margin-top:10px" onclick="openCamera(0,'attach')">📷 ถ่ายรูปเพิ่ม (หน้าถัดไป/ไฟล์แนบ)</button>
         <div class="upload-progress" id="upload-prog">
           <span id="upload-msg">กำลังอัพโหลด...</span>
           <div class="prog-bar-wrap"><div class="prog-bar" id="prog-bar"></div></div>
@@ -723,7 +732,14 @@ tbody td:last-child .row-act{min-width:0}
 <div class="overlay" id="cam-overlay" style="background:#000;z-index:3000;padding:0;align-items:stretch">
   <div class="cam-wrap">
     <video id="cam-video" autoplay playsinline muted></video>
-    <div class="cam-hint">วางหนังสือให้เต็มกรอบ ให้เห็นส่วนหัวชัดๆ แล้วกดปุ่มกลม</div>
+    <div class="cam-guide" id="cam-guide">
+      <div class="gz gz-no"><b>เลขที่หนังสือ</b></div>
+      <div class="gz gz-ag"><b>หน่วยงาน</b></div>
+      <div class="gz gz-dt"><b>วันที่</b></div>
+      <div class="gz gz-sj"><b>เรื่อง</b></div>
+    </div>
+    <div class="cam-hint">จัดหนังสือให้ส่วนหัวตรงกับกรอบ ให้เห็นทั้ง 4 ช่องแดงชัดๆ แล้วกดปุ่มกลม</div>
+    <button type="button" class="cam-tg" id="cam-tg" onclick="toggleGuide()">▭ กรอบ: เปิด</button>
     <div class="cam-bar">
       <button type="button" class="cam-side" onclick="closeCamera()">✕ ยกเลิก</button>
       <button type="button" class="cam-shutter" onclick="snapCamera()" aria-label="ถ่ายรูป"></button>
@@ -877,6 +893,8 @@ function updateStats() {
     if (r['วันที่รับ']) { var d=new Date(r['วันที่รับ']); if (d.getMonth()===m&&d.getFullYear()===yr) month++; }
     if (r['ลิงก์ไฟล์']&&r['ลิงก์ไฟล์']!=='-') files++;
   });
+  var nf = S.records.filter(function(r){ return !parseFiles(r['ลิงก์ไฟล์']).length; }).length;
+  var bn = g('btn-nofile'); if (bn) bn.textContent = '⚠️ ยังไม่อัพเอกสาร (' + nf + ')';
   g('s-total').textContent = S.records.length;
   g('s-month').textContent = month;
   g('s-files').textContent = files;
@@ -916,12 +934,10 @@ function renderCards(rows) {
         + (it['หมายเหตุ'] ? '<div class="m-note">📝 '+esc(it['หมายเหตุ'])+'</div>' : '')
         + '</div>';
     });
-    if (chips || isAdmin) {
-      h += '<div class="m-foot"><div class="file-chips">'+chips+'</div>';
-      if (isAdmin) h += '<div class="row-act"><button class="icon-btn edit" title="แก้ไข" onclick="openEditModal(\''+item['id']+'\')">✏️</button>'
-        + '<button class="icon-btn del" title="ลบ" onclick="confirmDel(\''+item['id']+'\')">🗑️</button></div>';
-      h += '</div>';
-    }
+    h += '<div class="m-foot"><div class="file-chips">'+(chips || '<span class="nofile">⚠️ ยังไม่ได้อัพเอกสาร</span>')+'</div>';
+    if (isAdmin) h += '<div class="row-act"><button class="icon-btn edit" title="แก้ไข" onclick="openEditModal(\''+item['id']+'\')">✏️</button>'
+      + '<button class="icon-btn del" title="ลบ" onclick="confirmDel(\''+item['id']+'\')">🗑️</button></div>';
+    h += '</div>';
     return h + '</div>';
   }).join('');
 }
@@ -956,7 +972,7 @@ function renderTable(data) {
       }
       html += '<td class="it"><div class="note">'+(esc(it['หมายเหตุ']||'') || '<span class="dash">—</span>')+'</div></td>';
       if (i === 0) {
-        html += '<td'+rs+'>'+(chips?'<div class="file-chips">'+chips+'</div>':'<span class="dash">—</span>')+'</td>';
+        html += '<td'+rs+'>'+(chips?'<div class="file-chips">'+chips+'</div>':'<span class="nofile">⚠️ ยังไม่ได้อัพเอกสาร</span>')+'</td>';
         if (isAdmin) html += '<td'+rs+'><div class="row-act"><button class="icon-btn edit" title="แก้ไข" onclick="openEditModal(\''+item['id']+'\')">✏️</button>'
           + '<button class="icon-btn del" title="ลบ" onclick="confirmDel(\''+item['id']+'\')">🗑️</button></div></td>';
       }
@@ -1603,7 +1619,13 @@ function quickCapture() {
    mode 'ocr'    = ถ่ายแล้วอ่านข้อความกรอกฟอร์ม + แนบรูป
    mode 'attach' = ถ่ายแล้วแนบเป็นไฟล์เฉยๆ
 ════════════════════════════════════════ */
-var CAM = { stream: null, idx: 0, mode: 'ocr', facing: 'environment' };
+var CAM = { stream: null, idx: 0, mode: 'ocr', facing: 'environment', guide: true };
+
+function toggleGuide() {
+  CAM.guide = !CAM.guide;
+  g('cam-guide').style.display = CAM.guide ? '' : 'none';
+  g('cam-tg').textContent = '▭ กรอบ: ' + (CAM.guide ? 'เปิด' : 'ปิด');
+}
 
 function camFallback(msg) {
   if (msg) toast(msg, 'warn');
@@ -1650,10 +1672,20 @@ function closeCamera() {
 function snapCamera() {
   var v = g('cam-video');
   if (!v || !v.videoWidth) { toast('กล้องยังไม่พร้อม รอสักครู่','warn'); return; }
-  var s = Math.min(1, 2400 / Math.max(v.videoWidth, v.videoHeight));
+  // ครอปเฉพาะบริเวณในกรอบแนะนำ (ส่วนหัวหนังสือ) เพื่อให้อ่านแม่นขึ้น
+  var sx = 0, sy = 0, sw = v.videoWidth, sh = v.videoHeight;
+  if (CAM.guide) {
+    var gr = g('cam-guide').getBoundingClientRect(), vr = v.getBoundingClientRect();
+    var sc = Math.min(vr.width / v.videoWidth, vr.height / v.videoHeight);
+    var ox = vr.left + (vr.width - v.videoWidth * sc) / 2, oy = vr.top + (vr.height - v.videoHeight * sc) / 2;
+    var cx = Math.max(0, (gr.left - ox) / sc), cy = Math.max(0, (gr.top - oy) / sc);
+    var cw = Math.min(v.videoWidth - cx, gr.width / sc), ch = Math.min(v.videoHeight - cy, gr.height / sc);
+    if (cw > 100 && ch > 100) { sx = cx; sy = cy; sw = cw; sh = ch; }
+  }
+  var s = Math.min(1, 2400 / Math.max(sw, sh));
   var c = document.createElement('canvas');
-  c.width = Math.round(v.videoWidth * s); c.height = Math.round(v.videoHeight * s);
-  c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+  c.width = Math.round(sw * s); c.height = Math.round(sh * s);
+  c.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, c.width, c.height);
   var idx = CAM.idx, mode = CAM.mode;
   closeCamera();
   c.toBlob(function(b) {
@@ -1915,6 +1947,7 @@ function getFiltered() {
   var a = (val('flt-agency')||'').trim();
   return getSorted().filter(function(r) {
     var its = recItems(r);
+    if (S.onlyNoFile && parseFiles(r['ลิงก์ไฟล์']).length) return false;
     if (ms) {
       var d = new Date(r['วันที่รับ']);
       if (isNaN(d) || ms.indexOf(d.getMonth()) < 0) return false;
@@ -2156,6 +2189,15 @@ async function applyMerge() {
  
 function clearFilters() {
   setv('flt-month',''); setv('flt-agency',''); setv('search','');
+  S.onlyNoFile = false;
+  var bn = g('btn-nofile'); if (bn) { bn.classList.remove('btn-warn'); bn.classList.add('btn-sec'); }
+  applyFilters();
+}
+
+function toggleNoFile() {
+  S.onlyNoFile = !S.onlyNoFile;
+  var bn = g('btn-nofile');
+  if (bn) { bn.classList.toggle('btn-warn', S.onlyNoFile); bn.classList.toggle('btn-sec', !S.onlyNoFile); }
   applyFilters();
 }
  
@@ -2387,12 +2429,8 @@ async function runOcr(file, idx, fromCam) {
  
     var dup = S.files.some(function(x){ return x.name === file.name && x.base64 === origB64; });
     // PDF แนบเข้ารายการเสมอ / รูปที่ถ่ายจากกล้อง แนบเป็น JPG ที่ย่อแล้ว / รูปที่เลือกจากไฟล์ใช้อ่านข้อความเท่านั้น
+    // รูปที่ถ่าย/เลือกจาก JPG-PNG ใช้อ่านข้อมูลอย่างเดียว ไม่บันทึกลงระบบ (ไฟล์จริงสแกนแนบทีหลัง)
     if (isPdf && !dup) { S.files.push({ name: file.name, mimeType: origMime, base64: origB64 }); renderFileList(); }
-    else if (fromCam && isImg && !S.files.some(function(x){ return x.base64 === send.base64; })) {
-      var dt = new Date(), pp = function(n){ return ('0'+n).slice(-2); };
-      S.files.push({ name: 'ภาพถ่ายหนังสือ_' + dt.getFullYear() + pp(dt.getMonth()+1) + pp(dt.getDate()) + '_' + pp(dt.getHours()) + pp(dt.getMinutes()) + pp(dt.getSeconds()) + '.jpg', mimeType: send.mimeType, base64: send.base64 });
-      renderFileList();
-    }
  
     var warnFields = unc.filter(function(k){ var e = itemEl(idx, k); return !!(e && e.value); });
     S.ocrConfirmed = false;
@@ -2413,7 +2451,7 @@ async function runOcr(file, idx, fromCam) {
     var who = idx ? 'หนังสือฉบับที่ '+(idx+1)+': ' : '';
     if (idx) toast('อ่านไฟล์เสร็จ — ตรวจสอบช่องที่กรอกให้ในหนังสือฉบับที่ '+(idx+1),'ok');
     var tail = (viaGemini ? ' <span style="color:var(--g400)">(อ่านด้วย Gemini)</span>' : '')
-      + (r.note ? ' <span style="color:#b26a00">| Gemini ใช้ไม่ได้ ('+esc(r.note)+') จึงใช้ OCR ของ Drive แทน</span>' : '');
+      + (r.note ? ' <span style="color:#b26a00">| Gemini ใช้ไม่ได้ ('+esc(String(r.note).replace(/\s+/g,' ').slice(0,70))+'…) จึงใช้ OCR ของ Drive แทน</span>' : '');
     if (viaGemini && filled.length) setOcrStatus(who+'✅ กรอกให้แล้ว: '+filled.join(', ')+(missing.length ? ' <span style="color:#b26a00">| ไม่พบ: '+missing.join(', ')+'</span>' : '')+' — ช่องสีเหลืองคือที่ระบบกรอก โปรดตรวจสอบ'+tail);
     else if (viaGemini) setOcrStatus('<span style="color:var(--err)">⚠️ Gemini อ่านข้อมูลจากไฟล์นี้ไม่ได้ — กรุณากรอกเอง</span>');
     else if (!text.trim()) setOcrStatus('<span style="color:var(--err)">⚠️ อ่านข้อความจากไฟล์ไม่ได้ (ภาพอาจไม่ชัด) — กรุณากรอกเอง</span>');
