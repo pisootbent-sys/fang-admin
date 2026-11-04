@@ -254,6 +254,14 @@ td{padding:12px 16px;font-size:.9rem;color:var(--g800);vertical-align:middle}
 .del-confirm{background:var(--err);color:#fff;box-shadow:0 4px 12px rgba(192,57,43,.35)}
 .del-confirm:hover{filter:brightness(1.1);box-shadow:0 6px 18px rgba(192,57,43,.45)}
 .del-confirm:active{transform:scale(.97)}
+#cf-overlay{z-index:2600}
+#cf-overlay .modal-box{max-width:420px}
+.cf-icon{background:#fff4e0}
+.cf-detail{margin:16px 0 0;padding:12px 14px;background:var(--g50);border:1px solid var(--g200);border-left:4px solid var(--warn);border-radius:10px;font-size:.9rem;line-height:1.55;color:var(--g800);text-align:left;overflow-wrap:anywhere}
+.cf-detail b{display:block;color:var(--p);margin-bottom:2px}
+.cf-ok{background:var(--warn);color:#fff;box-shadow:0 4px 12px rgba(230,126,34,.35)}
+.cf-ok:hover{filter:brightness(1.08)}
+.cf-ok:active{transform:scale(.97)}
  
 /* Loader */
 #loader{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);backdrop-filter:blur(3px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
@@ -719,6 +727,23 @@ tbody td:last-child .row-act{min-width:0}
   </div>
 </div>
  
+<!-- Confirm Modal (กล่องยืนยันทั่วไป) -->
+<div class="overlay" id="cf-overlay">
+  <div class="modal-box">
+    <div class="modal-body" style="padding:30px 24px 22px">
+      <div class="del-icon-wrap cf-icon" id="cf-icon">⚠️</div>
+      <div class="del-title" id="cf-title"></div>
+      <div class="del-sub" id="cf-sub"></div>
+      <div class="cf-detail" id="cf-detail" style="display:none"></div>
+      <div class="del-divider"></div>
+      <div class="del-actions">
+        <button type="button" class="del-cancel" id="cf-cancel"></button>
+        <button type="button" class="del-confirm cf-ok" id="cf-ok"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Preview Modal -->
 <div class="overlay" id="preview-overlay">
   <div class="modal-box" style="max-width:920px;height:92vh">
@@ -1132,6 +1157,31 @@ function validate() {
   return ok;
 }
  
+/* กล่องยืนยันในสไตล์ระบบ (แทน confirm() ของเบราว์เซอร์) — คืนค่า Promise<boolean> */
+function askConfirm(o) {
+  return new Promise(function(res) {
+    var ov = g('cf-overlay');
+    g('cf-icon').textContent = o.icon || '⚠️';
+    g('cf-title').textContent = o.title || 'ยืนยัน';
+    g('cf-sub').innerHTML = o.sub || '';
+    var d = g('cf-detail');
+    if (o.detail) { d.innerHTML = o.detail; d.style.display = ''; } else { d.style.display = 'none'; }
+    var ok = g('cf-ok'), cn = g('cf-cancel');
+    ok.textContent = o.ok || 'ตกลง'; cn.textContent = o.cancel || 'ยกเลิก';
+    function done(v) {
+      ov.classList.remove('active');
+      ok.onclick = cn.onclick = ov.onclick = null; document.removeEventListener('keydown', onKey);
+      res(v);
+    }
+    function onKey(e) { if (e.key === 'Escape') done(false); }
+    ok.onclick = function(){ done(true); };
+    cn.onclick = function(){ done(false); };
+    ov.onclick = function(e){ if (e.target === ov) done(false); };
+    document.addEventListener('keydown', onKey);
+    ov.classList.add('active');
+  });
+}
+
 /* ตรวจหนังสือซ้ำ: เลขที่หนังสือ + หน่วยงานตรงกับรายการที่มีอยู่ในปีที่เปิดอยู่ (ไม่นับรายการที่กำลังแก้ไขเอง) */
 function dupNorm(x) { return String(x || '').replace(/\s+/g, '').replace(/[๐-๙]/g, function(d){ return '๐๑๒๓๔๕๖๗๘๙'.indexOf(d); }).toLowerCase(); }
 function findDuplicate() {
@@ -1163,7 +1213,15 @@ async function submitForm() {
   if (!validate()) return toast(S.vmsg || 'กรุณากรอกข้อมูลที่จำเป็น','warn');
   if (!S.dupOk) {
     var dup = findDuplicate();
-    if (dup && !confirm('⚠️ พบหนังสือที่เลขที่และหน่วยงานเดียวกันอยู่ในระบบแล้ว\n\nเลขรับ ' + dup.rn + '\n' + dup.no + '\n' + dup.ag + '\n\nต้องการบันทึกซ้ำหรือไม่? (กด ยกเลิก เพื่อกลับไปตรวจสอบ)')) return;
+    if (dup) {
+      var okDup = await askConfirm({
+        icon: '📄', title: 'พบหนังสือซ้ำในระบบ',
+        sub: 'มีหนังสือที่เลขที่และหน่วยงานเดียวกันอยู่แล้ว<br>ต้องการบันทึกซ้ำหรือไม่?',
+        detail: '<b>เลขรับ ' + esc(dup.rn) + '</b>' + esc(dup.no) + '<br>' + esc(dup.ag),
+        ok: 'บันทึกซ้ำ', cancel: 'กลับไปตรวจสอบ'
+      });
+      if (!okDup) return;
+    }
   }
  
   var btn = g('btn-save');
