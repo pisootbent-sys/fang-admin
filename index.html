@@ -755,7 +755,7 @@ tbody td:last-child .row-act{min-width:0}
    STATE
 ════════════════════════════════════════ */
 /* ★★★ ต้องแก้ 1 จุด: ใส่ลิงก์ Web app (ลงท้ายด้วย /exec) ของ Apps Script ที่ Deploy ไว้ ★★★ */
-var API_URL = 'https://script.google.com/a/macros/cmi.nfe.go.th/s/AKfycbwgLpgYZaqagN45813lYqlNb7XezuzRee-fWmmkJuZUcOAWxwJdFJ3tVcxhaTIwV7E/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwgLpgYZaqagN45813lYqlNb7XezuzRee-fWmmkJuZUcOAWxwJdFJ3tVcxhaTIwV7E/exec';
 
 var S = {
   role: null, u: null, p: null, year: null, years: [], records: [],
@@ -1399,7 +1399,7 @@ function parseDocNo(rest) {
 }
  
 var AGENCY_RE = /^(สำนักงาน|สำนัก|ศูนย์|กรม|กอง|กลุ่ม|กระทรวง|จังหวัด|ที่ว่าการอำเภอ|อำเภอ|โรงเรียน|วิทยาลัย|มหาวิทยาลัย|เทศบาล|องค์การบริหารส่วน|อบต|อบจ|โรงพยาบาล|สถานี|ธนาคาร|บริษัท|ห้างหุ้นส่วน|ศาล|สภา|มูลนิธิ|สมาคม|สหกรณ์|การไฟฟ้า|การประปา|ที่ทำการ|คณะ|สถาบัน|สกร)/;
-var SELF_RE = /ส่งเสริมการเรียนรู้ระดับอำเภอฝาง/;
+var SELF_RE = /(?:ส่งเสริมการเรียนรู้|สกร\.?|ศูนย์\s*สกร\.?)\s*ระดับ\s*อำเภอ\s*ฝาง|^สกร\.?\s*อำเภอ\s*ฝาง|เลขที่รับ|วัน\s*\/\s*เดือน\s*\/\s*ปี/;
  
 var AGENCY_ANY_RE = /(?:^|\s)((?:สำนักงาน|ศูนย์|กรม|กอง|กระทรวง|โรงเรียน|วิทยาลัย|มหาวิทยาลัย|เทศบาล|องค์การบริหารส่วน|ที่ว่าการอำเภอ)[ก-๙\s\.\-]+)/;
 function agencyAnywhere(line) {
