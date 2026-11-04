@@ -732,14 +732,7 @@ tbody td:last-child .row-act{min-width:0}
 <div class="overlay" id="cam-overlay" style="background:#000;z-index:3000;padding:0;align-items:stretch">
   <div class="cam-wrap">
     <video id="cam-video" autoplay playsinline muted></video>
-    <div class="cam-guide" id="cam-guide">
-      <div class="gz gz-no"><b>เลขที่หนังสือ</b></div>
-      <div class="gz gz-ag"><b>หน่วยงาน</b></div>
-      <div class="gz gz-dt"><b>วันที่</b></div>
-      <div class="gz gz-sj"><b>เรื่อง</b></div>
-    </div>
-    <div class="cam-hint">จัดหนังสือให้ส่วนหัวตรงกับกรอบ ให้เห็นทั้ง 4 ช่องแดงชัดๆ แล้วกดปุ่มกลม</div>
-    <button type="button" class="cam-tg" id="cam-tg" onclick="toggleGuide()">▭ กรอบ: เปิด</button>
+    <div class="cam-hint">ถ่ายให้เห็นส่วนหัวหนังสือชัดๆ ไม่เอียง แสงสว่างพอ แล้วกดปุ่มกลม</div>
     <div class="cam-bar">
       <button type="button" class="cam-side" onclick="closeCamera()">✕ ยกเลิก</button>
       <button type="button" class="cam-shutter" onclick="snapCamera()" aria-label="ถ่ายรูป"></button>
@@ -1619,13 +1612,7 @@ function quickCapture() {
    mode 'ocr'    = ถ่ายแล้วอ่านข้อความกรอกฟอร์ม + แนบรูป
    mode 'attach' = ถ่ายแล้วแนบเป็นไฟล์เฉยๆ
 ════════════════════════════════════════ */
-var CAM = { stream: null, idx: 0, mode: 'ocr', facing: 'environment', guide: true };
-
-function toggleGuide() {
-  CAM.guide = !CAM.guide;
-  g('cam-guide').style.display = CAM.guide ? '' : 'none';
-  g('cam-tg').textContent = '▭ กรอบ: ' + (CAM.guide ? 'เปิด' : 'ปิด');
-}
+var CAM = { stream: null, idx: 0, mode: 'ocr', facing: 'environment' };
 
 function camFallback(msg) {
   if (msg) toast(msg, 'warn');
@@ -1672,20 +1659,10 @@ function closeCamera() {
 function snapCamera() {
   var v = g('cam-video');
   if (!v || !v.videoWidth) { toast('กล้องยังไม่พร้อม รอสักครู่','warn'); return; }
-  // ครอปเฉพาะบริเวณในกรอบแนะนำ (ส่วนหัวหนังสือ) เพื่อให้อ่านแม่นขึ้น
-  var sx = 0, sy = 0, sw = v.videoWidth, sh = v.videoHeight;
-  if (CAM.guide) {
-    var gr = g('cam-guide').getBoundingClientRect(), vr = v.getBoundingClientRect();
-    var sc = Math.min(vr.width / v.videoWidth, vr.height / v.videoHeight);
-    var ox = vr.left + (vr.width - v.videoWidth * sc) / 2, oy = vr.top + (vr.height - v.videoHeight * sc) / 2;
-    var cx = Math.max(0, (gr.left - ox) / sc), cy = Math.max(0, (gr.top - oy) / sc);
-    var cw = Math.min(v.videoWidth - cx, gr.width / sc), ch = Math.min(v.videoHeight - cy, gr.height / sc);
-    if (cw > 100 && ch > 100) { sx = cx; sy = cy; sw = cw; sh = ch; }
-  }
-  var s = Math.min(1, 2400 / Math.max(sw, sh));
+  var s = Math.min(1, 2400 / Math.max(v.videoWidth, v.videoHeight));
   var c = document.createElement('canvas');
-  c.width = Math.round(sw * s); c.height = Math.round(sh * s);
-  c.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  c.width = Math.round(v.videoWidth * s); c.height = Math.round(v.videoHeight * s);
+  c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
   var idx = CAM.idx, mode = CAM.mode;
   closeCamera();
   c.toBlob(function(b) {
