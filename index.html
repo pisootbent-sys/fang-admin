@@ -433,6 +433,20 @@ tbody td:last-child .row-act{min-width:0}
 .m-note{margin-top:5px;font-size:.82rem;color:var(--g600);overflow-wrap:anywhere}
 .m-foot{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--g50);flex-wrap:wrap}
 .m-foot .file-chips{flex:1;min-width:0}
+.urg{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;flex-shrink:0;vertical-align:baseline}
+.urg.u0{background:#2fb344}.urg.u1{background:#f5c800}.urg.u2{background:#ff8a1f}.urg.u3{background:#e53935}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tg{font-size:.72rem;line-height:1.6;color:var(--p);background:var(--pl);padding:0 9px;border-radius:99px;cursor:pointer;white-space:nowrap;transition:var(--tr)}
+.tg:hover{background:#d3dcee}
+.tsg{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tsg-chip{font-size:.78rem;color:var(--p);background:#fff;border:1px dashed var(--p);padding:2px 10px;border-radius:99px;cursor:pointer;font-family:inherit}
+.tsg-chip:hover{background:var(--pl)}
+.tsg-note{font-size:.76rem;color:var(--g400);margin-top:4px}
+.urg-legend{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.8rem;color:var(--g600)}
+.ug{display:inline-flex;align-items:center;border:1.5px solid var(--g200);background:#fff;border-radius:99px;padding:3px 11px 3px 9px;cursor:pointer;font:inherit;font-size:.8rem;color:var(--g600);transition:var(--tr)}
+.ug .urg{margin-right:6px}
+.ug:hover{border-color:var(--g400)}
+.ug.on{border-color:var(--p);background:var(--pl);color:var(--pk);font-weight:700}
 .m-more{width:100%;justify-content:center;padding:14px;margin-top:2px}
 .m-end{text-align:center;color:rgba(255,255,255,.8);font-size:.82rem;padding:6px 0 4px}
 .m-empty{background:#fff;border-radius:16px;padding:48px 20px;text-align:center;color:var(--g400)}
@@ -452,6 +466,7 @@ tbody td:last-child .row-act{min-width:0}
   .filter-bar input{width:100%;flex:1 1 100%}
   .filter-bar .btn{flex:1 1 auto;justify-content:center}
   .filter-bar .flt-count{flex:1 1 100%;text-align:center}
+  .urg-legend{flex:1 1 100%}
   input,textarea,select{font-size:16px!important}
   .btn{padding:11px 18px}
   .btn-sm{padding:9px 14px}
@@ -549,6 +564,7 @@ tbody td:last-child .row-act{min-width:0}
       <input id="flt-agency" list="dl-flt-agency" type="text" autocomplete="off" placeholder="🏢 ทุกหน่วยงาน (พิมพ์หรือเลือก)" title="พิมพ์บางส่วนของชื่อหน่วยงานได้" oninput="applyFilters()">
       <datalist id="dl-flt-agency"></datalist>
       <button class="btn btn-sec btn-sm" onclick="clearFilters()">✖ ล้างตัวกรอง</button>
+      <div class="urg-legend" id="urg-legend"><span>ความเร่งด่วน:</span><button type="button" class="ug" data-urg="ปกติ" onclick="toggleUrg('ปกติ')"><span class="urg u0"></span>ปกติ</button><button type="button" class="ug" data-urg="ด่วน" onclick="toggleUrg('ด่วน')"><span class="urg u1"></span>ด่วน</button><button type="button" class="ug" data-urg="ด่วนมาก" onclick="toggleUrg('ด่วนมาก')"><span class="urg u2"></span>ด่วนมาก</button><button type="button" class="ug" data-urg="ด่วนที่สุด" onclick="toggleUrg('ด่วนที่สุด')"><span class="urg u3"></span>ด่วนที่สุด</button></div>
       <button class="btn btn-sec btn-sm" id="btn-nofile" onclick="toggleNoFile()" title="แสดงเฉพาะเรื่องที่ยังไม่ได้อัพไฟล์เอกสาร">⚠️ ยังไม่อัพเอกสาร</button>
       <button class="btn btn-warn btn-sm admin-only" onclick="openMergeModal()">🧹 รวม/เปลี่ยนชื่อหน่วยงาน</button>
       <span class="flt-count" id="flt-count"></span>
@@ -648,6 +664,15 @@ tbody td:last-child .row-act{min-width:0}
         <div class="fg full">
           <label>เรื่อง <span class="req">*</span><button type="button" class="mic-btn" data-mic="f-เรื่อง" title="พูดแทนการพิมพ์">🎤</button></label>
           <textarea id="f-เรื่อง" rows="2"></textarea>
+        </div>
+        <div class="fg full">
+          <label>ความเร่งด่วน</label>
+          <select id="f-ความเร่งด่วน"><option value="ปกติ">🟩 ปกติ</option><option value="ด่วน">🟨 ด่วน</option><option value="ด่วนมาก">🟧 ด่วนมาก</option><option value="ด่วนที่สุด">🟥 ด่วนที่สุด</option></select>
+        </div>
+        <div class="fg full">
+          <label>แท็ก # (ไว้ค้นหา — พิมพ์คั่นด้วยเว้นวรรค)<button type="button" class="mic-btn" data-mic="f-แท็ก" title="พูดแทนการพิมพ์">🎤</button></label>
+          <input id="f-แท็ก" type="text" placeholder="เช่น #งบประมาณ #ใบจัดสรร #ค่าวารสาร" autocomplete="off" data-sg="tag-sg" oninput="renderTagSuggest(this)" onfocus="renderTagSuggest(this)" onchange="this.value=normTags(this.value)">
+          <div id="tag-sg" class="tsg"></div>
         </div>
         <div class="fg full">
           <label>หมายเหตุ<button type="button" class="mic-btn" data-mic="f-หมายเหตุ" title="พูดแทนการพิมพ์">🎤</button></label>
@@ -780,7 +805,7 @@ tbody td:last-child .row-act{min-width:0}
    STATE
 ════════════════════════════════════════ */
 /* ★★★ ต้องแก้ 1 จุด: ใส่ลิงก์ Web app (ลงท้ายด้วย /exec) ของ Apps Script ที่ Deploy ไว้ ★★★ */
-var API_URL = 'https://script.google.com/macros/s/AKfycbwgLpgYZaqagN45813lYqlNb7XezuzRee-fWmmkJuZUcOAWxwJdFJ3tVcxhaTIwV7E/exec';
+var API_URL = 'ใส่ลิงก์ /exec ของ Apps Script ที่นี่';
 
 /* ติดตั้งเป็นแอป (PWA) — ทำงานเฉพาะเมื่อเปิดผ่าน https เช่น GitHub Pages */
 try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function(){}); } catch (e) {}
@@ -943,6 +968,75 @@ function nPart(s) {
  
 var HOV = { cur: null };
 
+/* ความเร่งด่วน (จุดสีหน้าชื่อเรื่อง) + แท็ก # */
+var URG_NAMES = ['ปกติ','ด่วน','ด่วนมาก','ด่วนที่สุด'];
+function urgDot(v) {
+  var i = URG_NAMES.indexOf(String(v || '').trim());
+  return i < 0 ? '' : '<span class="urg u' + i + '" title="' + URG_NAMES[i] + '"></span>';
+}
+function normTags(str) {
+  var seen = {}, out = [];
+  String(str || '').split(/[\s,，;；]+/).forEach(function(t) {
+    t = t.replace(/^#+/, '').trim();
+    if (!t || seen[t.toLowerCase()]) return;
+    seen[t.toLowerCase()] = 1; out.push('#' + t);
+  });
+  return out.join(' ');
+}
+function tagsHTML(str) {
+  var t = normTags(str);
+  return t ? '<div class="tags">' + t.split(' ').map(function(x){ return '<span class="tg" data-tag="' + esc(x) + '">' + esc(x) + '</span>'; }).join('') + '</div>' : '';
+}
+var TC = { r: null, n: -1, map: {} };
+function allTagCounts() {
+  if (TC.r === S.records && TC.n === S.records.length) return TC.map;
+  var m = {};
+  S.records.forEach(function(r) {
+    recItems(r).forEach(function(it) {
+      var t = normTags(it['แท็ก']); if (!t) return;
+      t.split(' ').forEach(function(x){ m[x] = (m[x] || 0) + 1; });
+    });
+  });
+  TC = { r: S.records, n: S.records.length, map: m };
+  return m;
+}
+/* แนะนำแท็กที่เคยใช้ (กดเพื่อเติม) — แสดงตามตัวอักษรที่กำลังพิมพ์ */
+function renderTagSuggest(inp) {
+  var box = g(inp.dataset.sg); if (!box) return;
+  var m = allTagCounts(), v = inp.value, toks = v.split(/\s+/), endsSpace = /\s$/.test(v);
+  var part = endsSpace ? '' : (toks[toks.length - 1] || '').replace(/^#+/, '').toLowerCase();
+  var used = {}; (endsSpace ? toks : toks.slice(0, -1)).forEach(function(t){ used[t.replace(/^#+/, '').toLowerCase()] = 1; });
+  var list = Object.keys(m).filter(function(t){ var k = t.slice(1).toLowerCase(); return !used[k] && (!part || k.indexOf(part) >= 0); })
+    .sort(function(a, b){ return m[b] - m[a] || a.localeCompare(b, 'th'); }).slice(0, 10);
+  box.innerHTML = list.length
+    ? list.map(function(t){ return '<button type="button" class="tsg-chip" data-tgt="' + inp.id + '" data-tag="' + esc(t) + '">' + esc(t) + ' <small>' + m[t] + '</small></button>'; }).join('')
+    : (Object.keys(m).length ? '' : '<div class="tsg-note">ยังไม่มีแท็กในระบบ — พิมพ์แท็กใหม่ได้เลย เช่น #งบประมาณ</div>');
+}
+function tagSearch(tag) {
+  setv('search', tag); applyFilters();
+  try { g('search').scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+}
+function toggleUrg(v) {
+  S.urgFilter = S.urgFilter === v ? '' : v;
+  document.querySelectorAll('.ug').forEach(function(b){ b.classList.toggle('on', b.dataset.urg === S.urgFilter); });
+  applyFilters();
+}
+document.addEventListener('click', function(ev) {
+  var c = ev.target.closest ? ev.target.closest('.tsg-chip') : null;
+  if (c) {
+    var inp = g(c.dataset.tgt); if (!inp) return;
+    ev.preventDefault();
+    var v = inp.value, endsSpace = /\s$/.test(v) || !v;
+    var base = endsSpace ? v : v.replace(/\S+$/, '');
+    inp.value = (base + c.dataset.tag + ' ').replace(/^\s+/, '');
+    try { inp.focus(); } catch (e) {}
+    renderTagSuggest(inp);
+    return;
+  }
+  var t = ev.target.closest ? ev.target.closest('.tg') : null;
+  if (t && t.dataset.tag && !t.closest('.overlay')) tagSearch(t.dataset.tag);
+});
+
 /* รายการแบบการ์ด (แสดงเฉพาะจอมือถือ) */
 var CARD_PAGE = 30, CARD_N = CARD_PAGE, CARD_ROWS = [], CARD_KEY = '';
 function moreCards() { CARD_N += CARD_PAGE; renderCards(CARD_ROWS, true); }
@@ -967,7 +1061,7 @@ function renderCards(all, keep) {
     items.forEach(function(it, i){
       h += '<div class="m-it"><div class="m-no">'+(k > 1 ? '<span class="doc-idx">'+(i+1)+'</span>' : '')+esc(it['เลขที่หนังสือ']||'—')+'</div>'
         + '<div class="m-meta">ลงวันที่ '+fmtD(it['ลงวันที่'])+' · '+esc(it['จากหน่วยงาน']||'—')+'</div>'
-        + '<div class="m-subj">'+(esc(it['เรื่อง'])||'<span class="dash">—</span>')+'</div>'
+        + '<div class="m-subj">'+urgDot(it['ความเร่งด่วน'])+(esc(it['เรื่อง'])||'<span class="dash">—</span>')+tagsHTML(it['แท็ก'])+'</div>'
         + (it['หมายเหตุ'] ? '<div class="m-note">📝 '+esc(it['หมายเหตุ'])+'</div>' : '')
         + '</div>';
     });
@@ -1009,7 +1103,7 @@ function renderTable(data) {
       html += '<td class="it"><span class="doc-no">' + (k > 1 ? '<span class="doc-idx">'+(i+1)+'</span>' : '') + esc(it['เลขที่หนังสือ']||'—') + '</span></td>'
         + '<td class="it"><span class="dt">'+fmtD(it['ลงวันที่'])+'</span></td>'
         + '<td class="it"><div class="ag">'+esc(it['จากหน่วยงาน']||'—')+'</div></td>'
-        + '<td class="it"><div class="subj">'+(esc(it['เรื่อง'])||'<span class="dash">—</span>')+'</div></td>';
+        + '<td class="it"><div class="subj">'+urgDot(it['ความเร่งด่วน'])+(esc(it['เรื่อง'])||'<span class="dash">—</span>')+tagsHTML(it['แท็ก'])+'</div></td>';
       if (i === 0) {
         html += '<td'+rs+'><span class="dt">'+fmtD(item['วันที่รับ'])+'</span></td>';
       }
@@ -1092,6 +1186,7 @@ function openAddModal() {
   ['เลขรับ','เลขที่หนังสือ','ลงวันที่','วันที่รับ','จากหน่วยงาน','เรื่อง','หมายเหตุ'].forEach(function(f){
     var e=g('f-'+f); if(e) e.value='';
   });
+  setv('f-ความเร่งด่วน','ปกติ'); setv('f-แท็ก',''); g('tag-sg').innerHTML = '';
   resetOcrUI(true);
   suggestAgency();
   g('f-เลขที่หนังสือ').dataset.autoPrefix = ''; g('no-chips').innerHTML = '';
@@ -1118,6 +1213,9 @@ function openEditModal(id) {
   setv('f-จากหน่วยงาน',   items[0]['จากหน่วยงาน']);
   setv('f-เรื่อง',         items[0]['เรื่อง']);
   setv('f-หมายเหตุ',       items[0]['หมายเหตุ']);
+  setv('f-ความเร่งด่วน',   items[0]['ความเร่งด่วน'] || 'ปกติ');
+  setv('f-แท็ก',           items[0]['แท็ก']);
+  g('tag-sg').innerHTML = '';
   resetOcrUI(false);
   suggestAgency();
   g('f-เลขที่หนังสือ').dataset.autoPrefix = '';
@@ -1243,14 +1341,17 @@ async function submitForm() {
     collectExtras();
     var items = [{ 'เลขที่หนังสือ': val('f-เลขที่หนังสือ').trim(), 'ลงวันที่': val('f-ลงวันที่'),
                    'จากหน่วยงาน': val('f-จากหน่วยงาน').trim(), 'เรื่อง': val('f-เรื่อง').trim(),
-                   'หมายเหตุ': val('f-หมายเหตุ').trim() }].concat(S.extra);
+                   'หมายเหตุ': val('f-หมายเหตุ').trim(),
+                   'ความเร่งด่วน': val('f-ความเร่งด่วน') || 'ปกติ', 'แท็ก': normTags(val('f-แท็ก')) }].concat(S.extra);
     var data = {
       'เลขที่หนังสือ': items[0]['เลขที่หนังสือ'],
       'ลงวันที่':      items[0]['ลงวันที่'],
       'จากหน่วยงาน':  items[0]['จากหน่วยงาน'],
       'เรื่อง':        items.length === 1 ? items[0]['เรื่อง'] : JSON.stringify(items),
       'วันที่รับ':     val('f-วันที่รับ'),
-      'หมายเหตุ':     items[0]['หมายเหตุ']
+      'หมายเหตุ':     items[0]['หมายเหตุ'],
+      'ความเร่งด่วน': items[0]['ความเร่งด่วน'],
+      'แท็ก':         items[0]['แท็ก']
     };
     if (S.editId) data['id'] = S.editId;
  
@@ -1618,6 +1719,13 @@ function parseLetterText(raw) {
     }
   }
   if (agency) out['จากหน่วยงาน'] = agency;
+  /* ความเร่งด่วน: บรรทัดในส่วนหัวที่เขียนคำเดียว เช่น ด่วนที่สุด / ด่วนมาก / ด่วน */
+  for (var ui = 0; ui < header.length; ui++) {
+    var uz = header[ui].replace(/[\s\.\-_:]+/g, '');
+    if (/^ด่วนที่สุด$/.test(uz)) { out['ความเร่งด่วน'] = 'ด่วนที่สุด'; break; }
+    if (/^ด่วนมาก$/.test(uz))   { out['ความเร่งด่วน'] = 'ด่วนมาก'; break; }
+    if (/^ด่วน$/.test(uz))      { out['ความเร่งด่วน'] = 'ด่วน'; break; }
+  }
   return out;
 }
 /* OCR-PARSER-END */
@@ -1629,7 +1737,8 @@ function parseLetterText(raw) {
    - คอลัมน์ เรื่อง เก็บเป็นข้อความธรรมดาถ้ามีฉบับเดียว, ถ้ามีหลายฉบับเก็บเป็น JSON ของทุกฉบับ
 ════════════════════════════════════════ */
 function recItems(r) {
-  var base = { 'เลขที่หนังสือ': r['เลขที่หนังสือ']||'', 'ลงวันที่': r['ลงวันที่']||'', 'จากหน่วยงาน': r['จากหน่วยงาน']||'', 'หมายเหตุ': r['หมายเหตุ']||'' };
+  var base = { 'เลขที่หนังสือ': r['เลขที่หนังสือ']||'', 'ลงวันที่': r['ลงวันที่']||'', 'จากหน่วยงาน': r['จากหน่วยงาน']||'', 'หมายเหตุ': r['หมายเหตุ']||'',
+               'ความเร่งด่วน': r['ความเร่งด่วน']||'', 'แท็ก': r['แท็ก']||'' };
   var raw = r['เรื่อง'], arr = null;
   if (raw && raw !== '-') { try { var p = JSON.parse(raw); if (Array.isArray(p)) arr = p; } catch(e) {} }
   function mk(subject, src, idx) {
@@ -1637,6 +1746,8 @@ function recItems(r) {
     function pick(k){ return src[k] != null ? String(src[k]) : base[k]; }
     return { 'เลขที่หนังสือ': pick('เลขที่หนังสือ'), 'ลงวันที่': pick('ลงวันที่'), 'จากหน่วยงาน': pick('จากหน่วยงาน'),
              'เรื่อง': String(subject == null ? '' : subject),
+             'ความเร่งด่วน': src['ความเร่งด่วน'] != null ? String(src['ความเร่งด่วน']) : (idx === 0 ? base['ความเร่งด่วน'] : ''),
+             'แท็ก': src['แท็ก'] != null ? String(src['แท็ก']) : (idx === 0 ? base['แท็ก'] : ''),
              // ข้อมูลเก่าที่ยังไม่มีหมายเหตุต่อฉบับ: ให้หมายเหตุเดิมอยู่ที่ฉบับแรกฉบับเดียว
              'หมายเหตุ': src['หมายเหตุ'] != null ? String(src['หมายเหตุ']) : (idx === 0 ? base['หมายเหตุ'] : '') };
   }
@@ -1646,7 +1757,7 @@ function recItems(r) {
   return out.length ? out : [mk('', null, 0)];
 }
  
-var ITEM_SUFFIX = { 'เลขที่หนังสือ':'no', 'ลงวันที่':'date', 'จากหน่วยงาน':'from', 'เรื่อง':'subj', 'หมายเหตุ':'note' };
+var ITEM_SUFFIX = { 'เลขที่หนังสือ':'no', 'ลงวันที่':'date', 'จากหน่วยงาน':'from', 'เรื่อง':'subj', 'หมายเหตุ':'note', 'ความเร่งด่วน':'urg', 'แท็ก':'tags' };
  
 /* ช่องกรอกของหนังสือฉบับที่ idx (0 = ฉบับแรกที่อยู่ด้านบน, 1+ = การ์ดฉบับเพิ่มเติม) */
 function itemEl(idx, key) {
@@ -1666,6 +1777,8 @@ function itemCardHTML(it, i) {
     + '<div class="fg"><label>ลงวันที่ <span class="req">*</span></label><input id="'+id+'date" type="date" value="'+esc(toInput(it['ลงวันที่']))+'"></div>'
     + '<div class="fg full"><label>จากหน่วยงาน <span class="req">*</span><button type="button" class="mic-btn" data-mic="'+id+'from" title="พูดแทนการพิมพ์">🎤</button></label><input id="'+id+'from" type="text" list="dl-จากหน่วยงาน" value="'+esc(it['จากหน่วยงาน'])+'"><div id="'+id+'sg" class="ag-suggest"></div></div>'
     + '<div class="fg full"><label>เรื่อง <span class="req">*</span><button type="button" class="mic-btn" data-mic="'+id+'subj" title="พูดแทนการพิมพ์">🎤</button></label><textarea id="'+id+'subj" rows="2">'+esc(it['เรื่อง'])+'</textarea></div>'
+    + '<div class="fg full"><label>ความเร่งด่วน</label><select id="'+id+'urg">'+URG_NAMES.map(function(n,k){ return '<option value="'+n+'"'+((it['ความเร่งด่วน']||'ปกติ')===n?' selected':'')+'>'+['🟩','🟨','🟧','🟥'][k]+' '+n+'</option>'; }).join('')+'</select></div>'
+    + '<div class="fg full"><label>แท็ก # (ไว้ค้นหา)<button type="button" class="mic-btn" data-mic="'+id+'tags" title="พูดแทนการพิมพ์">🎤</button></label><input id="'+id+'tags" type="text" value="'+esc(it['แท็ก']||'')+'" placeholder="เช่น #งบประมาณ #ใบจัดสรร" autocomplete="off" data-sg="'+id+'tsg" oninput="renderTagSuggest(this)" onfocus="renderTagSuggest(this)" onchange="this.value=normTags(this.value)"><div id="'+id+'tsg" class="tsg"></div></div>'
     + '<div class="fg full"><label>หมายเหตุ<button type="button" class="mic-btn" data-mic="'+id+'note" title="พูดแทนการพิมพ์">🎤</button></label><input id="'+id+'note" type="text" value="'+esc(it['หมายเหตุ']||'')+'"></div>'
     + '</div></div>';
 }
@@ -1690,14 +1803,15 @@ function collectExtras() {
     var no = g('it-'+i+'-no'); if (!no) return it;
     return { 'เลขที่หนังสือ': no.value.trim(), 'ลงวันที่': g('it-'+i+'-date').value,
              'จากหน่วยงาน': g('it-'+i+'-from').value.trim(), 'เรื่อง': g('it-'+i+'-subj').value.trim(),
-             'หมายเหตุ': g('it-'+i+'-note').value.trim() };
+             'หมายเหตุ': g('it-'+i+'-note').value.trim(),
+             'ความเร่งด่วน': g('it-'+i+'-urg').value, 'แท็ก': normTags(g('it-'+i+'-tags').value) };
   });
 }
  
 function addItem() {
   collectExtras();
   var ag0 = val('f-จากหน่วยงาน').trim(), pf = dirFor(ag0);
-  S.extra.push({ 'เลขที่หนังสือ': pf.length ? pf[0].prefix : '', 'ลงวันที่':'', 'จากหน่วยงาน': ag0, 'เรื่อง':'', 'หมายเหตุ':'' });
+  S.extra.push({ 'เลขที่หนังสือ': pf.length ? pf[0].prefix : '', 'ลงวันที่':'', 'จากหน่วยงาน': ag0, 'เรื่อง':'', 'หมายเหตุ':'', 'ความเร่งด่วน':'ปกติ', 'แท็ก':'' });
   renderExtras();
   var e = g('it-' + (S.extra.length-1) + '-no'); if (e) { e.focus(); if (e.scrollIntoView) e.scrollIntoView({ block: 'center' }); }
 }
@@ -1856,6 +1970,7 @@ function micStart(btn) {
   };
   rec.onend = function() {
     if (heard && id === 'f-จากหน่วยงาน') { el.value = snapAgencyName(el.value.trim()); }
+    if (heard && (id === 'f-แท็ก' || /-tags$/.test(id))) el.value = normTags(el.value);
     if (heard && id !== 'search') micFire(el);
     micReset();
   };
@@ -2037,6 +2152,7 @@ function getFiltered() {
   return getSorted().filter(function(r) {
     var its = recItems(r);
     if (S.onlyNoFile && parseFiles(r['ลิงก์ไฟล์']).length) return false;
+    if (S.urgFilter && !its.some(function(it){ return it['ความเร่งด่วน'] === S.urgFilter; })) return false;
     if (ms) {
       var d = new Date(r['วันที่รับ']);
       if (isNaN(d) || ms.indexOf(d.getMonth()) < 0) return false;
@@ -2045,7 +2161,7 @@ function getFiltered() {
     if (q) {
       var hit = (r['เลขรับ']||'').toLowerCase().indexOf(q) >= 0;
       if (!hit) hit = its.some(function(it){
-        return ['เลขที่หนังสือ','จากหน่วยงาน','เรื่อง','หมายเหตุ'].some(function(k){ return (it[k]||'').toLowerCase().indexOf(q) >= 0; });
+        return ['เลขที่หนังสือ','จากหน่วยงาน','เรื่อง','หมายเหตุ','แท็ก'].some(function(k){ return (it[k]||'').toLowerCase().indexOf(q) >= 0; });
       });
       if (!hit) return false;
     }
@@ -2278,7 +2394,8 @@ async function applyMerge() {
  
 function clearFilters() {
   setv('flt-month',''); setv('flt-agency',''); setv('search','');
-  S.onlyNoFile = false;
+  S.onlyNoFile = false; S.urgFilter = '';
+  document.querySelectorAll('.ug').forEach(function(b){ b.classList.remove('on'); });
   var bn = g('btn-nofile'); if (bn) { bn.classList.remove('btn-warn'); bn.classList.add('btn-sec'); }
   applyFilters();
 }
@@ -2318,7 +2435,7 @@ function reportLines() {
     recItems(r).forEach(function(it){
       if (a && normAg(it['จากหน่วยงาน']).indexOf(normAg(a)) < 0) return;
       out.push([r['เลขรับ']||'', it['เลขที่หนังสือ']||'', fmtD(it['ลงวันที่']), it['จากหน่วยงาน']||'',
-                it['เรื่อง']||'', fmtD(r['วันที่รับ']), it['หมายเหตุ']||'']);
+                it['เรื่อง']||'', fmtD(r['วันที่รับ']), it['หมายเหตุ']||'', it['ความเร่งด่วน']||'', normTags(it['แท็ก'])]);
     });
   });
   return out;
@@ -2332,7 +2449,7 @@ function printReport() {
     return '<tr>'+l.map(function(v){ return '<td>'+esc(v)+'</td>'; }).join('')+'</tr>';
   }).join('');
   g('print-root').innerHTML = '<div class="rpt"><h2>'+esc(info.title)+'</h2><div class="rpt-sub">'+esc(info.subtitle)+'</div>'
-    +'<table><thead><tr><th>เลขรับ</th><th>เลขที่หนังสือ</th><th>ลงวันที่</th><th>จากหน่วยงาน</th><th>เรื่อง</th><th>วันที่รับ</th><th>หมายเหตุ</th></tr></thead><tbody>'+body+'</tbody></table>'
+    +'<table><thead><tr><th>เลขรับ</th><th>เลขที่หนังสือ</th><th>ลงวันที่</th><th>จากหน่วยงาน</th><th>เรื่อง</th><th>วันที่รับ</th><th>หมายเหตุ</th><th>ความเร่งด่วน</th><th>แท็ก</th></tr></thead><tbody>'+body+'</tbody></table>'
     +'<div class="rpt-foot">รวม '+lines.length+' ฉบับ | พิมพ์เมื่อ '+esc(new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}))+'</div></div>';
   var done = function(){ document.body.classList.remove('printing'); g('print-root').innerHTML=''; window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
@@ -2381,7 +2498,7 @@ function buildXlsx(title, subtitle, headers, rows) {
   rows.forEach(function(r,ri){
     sd += '<row r="'+(ri+5)+'">'+headers.map(function(_,i){ return cell(i,ri+5,r[i],3); }).join('')+'</row>';
   });
-  var widths = [12,22,16,38,60,16,26];
+  var widths = [12,22,16,38,60,16,26,14,30];
   var X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
   var sheet = X+'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="4" topLeftCell="A5" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
     +'<cols>'+widths.map(function(w,i){ return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'; }).join('')+'</cols>'
@@ -2411,7 +2528,7 @@ async function exportExcel() {
   if (!data.length) { toast('ไม่มีข้อมูลให้ส่งออก','warn'); return; }
   var info = reportInfo();
   try {
-    var blob = buildXlsx(info.title, info.subtitle, ['เลขรับ','เลขที่หนังสือ','ลงวันที่','จากหน่วยงาน','เรื่อง','วันที่รับ','หมายเหตุ'], data);
+    var blob = buildXlsx(info.title, info.subtitle, ['เลขรับ','เลขที่หนังสือ','ลงวันที่','จากหน่วยงาน','เรื่อง','วันที่รับ','หมายเหตุ','ความเร่งด่วน','แท็ก'], data);
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = info.fname + '.xlsx';
@@ -2511,6 +2628,7 @@ async function runOcr(file, idx, fromCam) {
       if (v && k === 'เลขที่หนังสือ') v = snapDocNo(agVal || (itemEl(idx, 'จากหน่วยงาน').value || ''), v);
       if (e && v) { e.value = v; e.classList.add(unc.indexOf(k) >= 0 ? 'ocr-uncertain' : 'ocr-filled'); filled.push(k); } else missing.push(k);
     });
+    if (f['ความเร่งด่วน']) { var ue = itemEl(idx, 'ความเร่งด่วน'); if (ue) { ue.value = f['ความเร่งด่วน']; ue.classList.add('ocr-filled'); } }
     var noEl0 = itemEl(idx, 'เลขที่หนังสือ'); if (noEl0) noEl0.dataset.autoPrefix = '';
     suggestAgencyFor(itemEl(idx, 'จากหน่วยงาน'), itemSuggestEl(idx));
     applyAgencyPrefix(itemEl(idx, 'จากหน่วยงาน'), false);
