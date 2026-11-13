@@ -10,8 +10,23 @@ var LOGO_FILE_ID = 'ใส่ไฟล์ไอดีโลโก้ที่น
 var HEADERS_INCOMING = [
   'id', 'เลขรับ', 'เลขที่หนังสือ', 'ลงวันที่',
   'จากหน่วยงาน', 'เรื่อง', 'วันที่รับ', 'หมายเหตุ',
-  'ลิงก์ไฟล์', 'วันที่สร้าง'
+  'ลิงก์ไฟล์', 'วันที่สร้าง',
+  'ความเร่งด่วน', 'แท็ก'          // เพิ่มใหม่ (ต่อท้ายคอลัมน์เดิม ชีตเก่าจะเพิ่มหัวคอลัมน์ให้อัตโนมัติ)
 ];
+
+// ชีตปีเก่าที่ยังไม่มีคอลัมน์ ความเร่งด่วน/แท็ก → เพิ่มหัวคอลัมน์ให้ (ข้อมูลเดิมไม่เปลี่ยน)
+function ensureColumns_(sheet) {
+  var n = HEADERS_INCOMING.length;
+  if (sheet.getMaxColumns() < n) sheet.insertColumnsAfter(sheet.getMaxColumns(), n - sheet.getMaxColumns());
+  var hdr = sheet.getRange(1, 1, 1, n).getValues()[0];
+  for (var i = 10; i < n; i++) {
+    if (String(hdr[i] || '').trim()) continue;
+    var c = sheet.getRange(1, i + 1);
+    c.setValue(HEADERS_INCOMING[i]);
+    c.setBackground('#3d5a99').setFontColor('#ffffff').setFontWeight('bold').setHorizontalAlignment('center');
+    sheet.setColumnWidth(i + 1, i === 10 ? 100 : 220);
+  }
+}
  
 // ─── Web App Entry ────────────────────────────────────────────
  
@@ -422,7 +437,7 @@ function createYearSheet(year) {
     r.setValues([HEADERS_INCOMING]);
     r.setBackground('#3d5a99').setFontColor('#ffffff')
      .setFontWeight('bold').setHorizontalAlignment('center');
-    [50,90,120,110,160,300,110,160,110,110].forEach(function(w, i) {
+    [50,90,120,110,160,300,110,160,110,110,100,220].forEach(function(w, i) {
       sheet.setColumnWidth(i + 1, w);
     });
     sheet.setFrozenRows(1);
@@ -437,6 +452,7 @@ function getData(year) {
     if (!year) year = getBuddhistYear();
     var sheet = getSpreadsheet().getSheetByName(getSheetName(year));
     if (!sheet || sheet.getLastRow() < 2) return [];
+    ensureColumns_(sheet);
     var rows = sheet.getDataRange().getDisplayValues();
     var h = rows[0];
     return rows.slice(1).map(function(row) {
@@ -496,6 +512,7 @@ function addDataLocked_(data, year) {
     var ss = getSpreadsheet();
     var sheet = ss.getSheetByName(getSheetName(year));
     if (!sheet) { createYearSheet(year); sheet = ss.getSheetByName(getSheetName(year)); }
+    ensureColumns_(sheet);
  
     var rnIdx = HEADERS_INCOMING.indexOf('เลขรับ');
     var lastRow = sheet.getLastRow();
@@ -529,6 +546,7 @@ function updateData(data, year) {
     if (!year) year = getBuddhistYear();
     var sheet = getSpreadsheet().getSheetByName(getSheetName(year));
     if (!sheet) throw new Error('ไม่พบ Sheet ปี ' + year);
+    ensureColumns_(sheet);
  
     var values = sheet.getDataRange().getValues();
     var idIdx  = HEADERS_INCOMING.indexOf('id');
